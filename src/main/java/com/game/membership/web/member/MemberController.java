@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.game.membership.global.response.ResultCode.MEMBER_SAVE_SUCCESS;
-import static com.game.membership.global.response.ResultCode.MEMBER_UPDATE_SUCCESS;
+import static com.game.membership.global.response.ResultCode.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -62,5 +61,22 @@ public class MemberController {
         model.addAttribute("members", members);
         model.addAttribute("condition", condition);
         return "member/member_list";
+    }
+
+    @GetMapping("/{id}")
+    public String getMember(@PathVariable Long id, Model model) {
+        MemberDto member = memberService.getMember(id);
+        model.addAttribute("member", member);
+        return "member/member_detail";
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResultResponse> deleteMember(@PathVariable Long id) {
+        try {
+            memberService.deleteMember(id);
+            return ResponseEntity.ok(new ResultResponse(MEMBER_DELETE_SUCCESS, "/member/list"));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
+        }
     }
 }
