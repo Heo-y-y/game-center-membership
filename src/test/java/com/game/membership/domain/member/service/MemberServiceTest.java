@@ -1,5 +1,6 @@
 package com.game.membership.domain.member.service;
 
+import com.game.membership.domain.member.dto.MemberDto;
 import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.dto.MemberListConditionDto;
 import com.game.membership.domain.member.dto.MemberListDto;
@@ -30,7 +31,6 @@ class MemberServiceTest {
     private MemberRepository memberRepository;
 
     private final MemberListConditionDto condition = new MemberListConditionDto();
-
 
     @AfterEach
     public void afterEach() {
@@ -193,6 +193,68 @@ class MemberServiceTest {
             list.forEach(member -> {
                 assertThat(member.getLevel()).isEqualTo(Level.BRONZE);
             });
+        }
+    }
+
+    @Nested
+    class MemberDelete {
+
+        @Test
+        @DisplayName("회원정보 삭제 성공")
+        void deleteMemberSuccess() throws Exception {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setName("testName");
+            dto.setEmail("test@gmail.com");
+
+            // when
+            memberService.saveMember(dto);
+            Optional<Member> savedMember = memberRepository.findByEmail(dto.getEmail());
+            memberService.deleteMember(savedMember.get().getId());
+            Optional<Member> deletedMember = memberRepository.findById(savedMember.get().getId());
+
+            // then
+            assertThat(deletedMember).isEmpty();
+
+        }
+
+        @Test
+        @DisplayName("존재하는 유저 없음")
+        void memberDeleteMemberNotFound() throws Exception {
+
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> memberService.deleteMember(1L));
+            assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
+        }
+    }
+
+    @Nested
+    class GetMember {
+        @Test
+        @DisplayName("회원상세 조회 성공")
+        void getMemberSuccess() throws Exception {
+            // given
+            MemberFormDto dto1 = new MemberFormDto();
+            dto1.setName("testName");
+            dto1.setEmail("test@gmail.com");
+            memberService.saveMember(dto1);
+            Optional<Member> saveMember = memberRepository.findByEmail(dto1.getEmail());
+
+            // when
+            MemberDto member = memberService.getMember(saveMember.get().getId());
+
+            // then
+            assertNotNull(member);
+            assertEquals("testName", member.getName());
+            assertEquals("test@gmail.com", member.getEmail());
+        }
+
+        @Test
+        @DisplayName("MemberNotFound")
+        void getMemberMemberNotFound() throws Exception {
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> memberService.getMember(1L));
+            assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
         }
     }
 }

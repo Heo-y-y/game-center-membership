@@ -71,6 +71,14 @@ public class MemberService {
         return memberRepository.searchAllMembers(condition);
     }
 
+    @Transactional
+    public void deleteMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+
+        memberRepository.delete(member);
+    }
+
     private MemberDto convertToMemberDto(Member member) {
         MemberDto dto = new MemberDto();
         dto.setId(member.getId());

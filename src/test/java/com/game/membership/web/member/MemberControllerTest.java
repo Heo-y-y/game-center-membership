@@ -1,5 +1,6 @@
 package com.game.membership.web.member;
 
+import com.game.membership.domain.member.dto.MemberDto;
 import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.service.MemberService;
 import com.game.membership.global.error.BusinessException;
@@ -18,12 +19,13 @@ import static com.game.membership.global.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.game.membership.global.response.ResultCode.MEMBER_SAVE_SUCCESS;
 import static com.game.membership.global.response.ResultCode.MEMBER_UPDATE_SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -106,6 +108,30 @@ class MemberControllerTest {
                         .andExpect(jsonPath("$.status").value(500))
                         .andExpect(jsonPath("$.message").value(expectedException.getMessage()));
 
+            }
+        }
+
+        @Nested
+        class GetMember {
+            @Test
+            @DisplayName("getMember")
+            void getMember () throws Exception{
+                // given
+                Long memberId = 1L;
+                MemberDto memberDto = new MemberDto();
+                memberDto.setId(memberId);
+                memberDto.setName("John Doe");
+                memberDto.setEmail("john.doe@example.com");
+
+                // when
+                doReturn(memberDto).when(memberService).getMember(anyLong());
+
+                // then
+                mvc.perform(get("/member/{id}", memberId))
+                        .andExpect(status().isOk())
+                        .andExpect(view().name("member/member_detail"))
+                        .andExpect(model().attributeExists("member"))
+                        .andExpect(model().attribute("member", memberDto));
             }
         }
     }
