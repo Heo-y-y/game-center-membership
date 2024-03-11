@@ -1,15 +1,18 @@
 package com.game.membership.domain.member.service;
 
 import com.game.membership.domain.member.dto.MemberFormDto;
+import com.game.membership.domain.member.dto.MemberListConditionDto;
+import com.game.membership.domain.member.dto.MemberListDto;
 import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.global.error.BusinessException;
-import com.game.membership.web.member.dto.MemberDto;
+import com.game.membership.domain.member.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -62,6 +65,10 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         return convertToMemberDto(member);
+    }
+
+    public List<MemberListDto> searchAllMembers(MemberListConditionDto condition) {
+        return memberRepository.searchAllMembers(condition);
     }
 
     private MemberDto convertToMemberDto(Member member) {

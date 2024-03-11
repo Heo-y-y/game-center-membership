@@ -1,4 +1,4 @@
-package com.game.membership.web.member.dto;
+package com.game.membership.domain.member.dto;
 
 import lombok.Getter;
 import lombok.Setter;

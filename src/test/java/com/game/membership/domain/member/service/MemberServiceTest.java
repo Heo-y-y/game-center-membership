@@ -1,6 +1,8 @@
 package com.game.membership.domain.member.service;
 
 import com.game.membership.domain.member.dto.MemberFormDto;
+import com.game.membership.domain.member.dto.MemberListConditionDto;
+import com.game.membership.domain.member.dto.MemberListDto;
 import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
@@ -12,8 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -24,6 +28,9 @@ class MemberServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    private final MemberListConditionDto condition = new MemberListConditionDto();
+
 
     @AfterEach
     public void afterEach() {
@@ -132,6 +139,60 @@ class MemberServiceTest {
             assertEquals(exception.getMessage(), "이미 가입된 이메일입니다.");
 
         }
+    }
 
+    @Nested
+    class SearchAllMembers {
+
+        @Test
+        @DisplayName("이름 검색 성공")
+        void searchAllMemberNameSuccess() throws Exception {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setName("박효신");
+            dto.setEmail("hyo@gmail.com");
+
+            MemberFormDto dto1 = new MemberFormDto();
+            dto1.setName("박지성");
+            dto1.setEmail("mu@gmail.com");
+
+            memberService.saveMember(dto);
+            memberService.saveMember(dto1);
+
+            condition.setName("박지성");
+            // when
+            List<MemberListDto> list = memberService.searchAllMembers(condition);
+
+            // then
+            list.forEach(member -> {
+                assertThat(member.getName()).isEqualTo("박지성");
+                assertThat(member.getEmail()).isEqualTo("mu@gmail.com");
+            });
+        }
+
+        @Test
+        @DisplayName("레벨 검색 성공")
+        void searchAllMemberLevelSuccess() throws Exception {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setName("박효신");
+            dto.setEmail("hyo@gmail.com");
+
+            MemberFormDto dto1 = new MemberFormDto();
+            dto1.setName("박지성");
+            dto1.setEmail("mu@gmail.com");
+
+            memberService.saveMember(dto);
+            memberService.saveMember(dto1);
+
+            condition.setLevel(Level.BRONZE);
+            // when
+            List<MemberListDto> list = memberService.searchAllMembers(condition);
+
+            // then
+            list.forEach(member -> {
+                assertThat(member.getLevel()).isEqualTo(Level.BRONZE);
+            });
+        }
     }
 }

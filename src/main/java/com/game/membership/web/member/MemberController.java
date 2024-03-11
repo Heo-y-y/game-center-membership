@@ -1,14 +1,16 @@
 package com.game.membership.web.member;
 
-import com.game.membership.domain.member.dto.MemberFormDto;
+import com.game.membership.domain.member.dto.*;
 import com.game.membership.domain.member.service.MemberService;
 import com.game.membership.global.response.ResultResponse;
-import com.game.membership.web.member.dto.MemberDto;
+import com.game.membership.domain.member.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.game.membership.global.response.ResultCode.MEMBER_SAVE_SUCCESS;
 import static com.game.membership.global.response.ResultCode.MEMBER_UPDATE_SUCCESS;
@@ -30,7 +32,7 @@ public class MemberController {
     public ResponseEntity<ResultResponse> saveMember(MemberFormDto dto) {
         try {
             memberService.saveMember(dto);
-            return ResponseEntity.ok(new ResultResponse(MEMBER_SAVE_SUCCESS, null));
+            return ResponseEntity.ok(new ResultResponse(MEMBER_SAVE_SUCCESS, "/member/list"));
         } catch (Exception e) {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
         }
@@ -52,5 +54,13 @@ public class MemberController {
         } catch (Exception e) {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
         }
+    }
+
+    @GetMapping("/list")
+    public String getMembers(Model model, MemberListConditionDto condition) {
+        List<MemberListDto> members = memberService.searchAllMembers(condition);
+        model.addAttribute("members", members);
+        model.addAttribute("condition", condition);
+        return "member/member_list";
     }
 }
