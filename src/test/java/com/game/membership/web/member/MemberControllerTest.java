@@ -14,10 +14,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import static com.game.membership.global.error.ErrorCode.EMAIL_ALREADY_EXIST;
+import static com.game.membership.global.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.game.membership.global.response.ResultCode.MEMBER_SAVE_SUCCESS;
+import static com.game.membership.global.response.ResultCode.MEMBER_UPDATE_SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -68,6 +71,42 @@ class MemberControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(500))
                     .andExpect(jsonPath("$.message").value(expectedException.getMessage()));
+        }
+
+        @Nested
+        class UpdateMember {
+            @Test
+            @DisplayName("updateMember")
+            void updateMember () throws Exception{
+                // given
+                String json = "{\"name\": \"testName\", \"email\": \"test@gmail.com\"}";
+
+
+                // when, then
+                mvc.perform(patch("/member/view/{id}", 1L)
+                                .contentType(APPLICATION_JSON)
+                                .content(json))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.status").value(MEMBER_UPDATE_SUCCESS.getStatus()))
+                        .andExpect(jsonPath("$.message").value(MEMBER_UPDATE_SUCCESS.getMessage()));
+            }
+
+            @Test
+            @DisplayName("")
+            void checkUpdateMemberFail () throws Exception{
+                // given
+                String json = "{\"name\": \"testName\", \"email\": \"test@gmail.com\"}";
+                BusinessException expectedException = new BusinessException(MEMBER_NOT_FOUND);
+                doThrow(expectedException).when(memberService).updateMember(any(MemberFormDto.class), any(Long.class));
+                // when, then
+                mvc.perform(patch("/member/view/{id}", 1L)
+                                .contentType(APPLICATION_JSON)
+                                .content(json))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.status").value(500))
+                        .andExpect(jsonPath("$.message").value(expectedException.getMessage()));
+
+            }
         }
     }
 }

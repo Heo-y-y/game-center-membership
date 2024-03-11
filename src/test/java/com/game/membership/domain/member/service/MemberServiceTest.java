@@ -70,4 +70,68 @@ class MemberServiceTest {
 
         }
     }
+
+    @Nested
+    class UpdateMember {
+        @Test
+        @DisplayName("회원 수정 성공")
+        void updateMemberSuccess() throws Exception {
+            // given
+            Member member = new Member();
+            member.setName("testName");
+            member.setEmail("test@gmail.com");
+            Member saveMember = memberRepository.save(member);
+
+            MemberFormDto dto = new MemberFormDto();
+            dto.setName("changeName");
+            dto.setEmail("change@gmail.com");
+
+            // when
+            memberService.updateMember(dto, saveMember.getId());
+            Member updatedMember = memberRepository.findById(saveMember.getId()).orElse(null);
+
+            // then
+            assertNotNull(updatedMember);
+            assertEquals("changeName", updatedMember.getName());
+            assertEquals("change@gmail.com", updatedMember.getEmail());
+        }
+
+        @Test
+        @DisplayName("회원 찾기 실패")
+        void memberNotFound() throws Exception {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setName("testName");
+            dto.setEmail("test@gmail.com");
+
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> memberService.updateMember(dto, 1L));
+            assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
+        }
+
+        @Test
+        @DisplayName("존재하는 이메일 확인")
+        void emailAlreadyExist() throws Exception {
+            // given
+            Member testMember = new Member();
+            testMember.setName("testName");
+            testMember.setEmail("test@gmail.com");
+            Member saveMember = memberRepository.save(testMember);
+
+            Member anotherMember = new Member();
+            anotherMember.setName("anotherName");
+            anotherMember.setEmail("test@naver.com");
+            memberRepository.save(anotherMember);
+
+            MemberFormDto dto = new MemberFormDto();
+            dto.setName("changeName");
+            dto.setEmail("test@naver.com");
+
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> memberService.updateMember(dto, saveMember.getId()));
+            assertEquals(exception.getMessage(), "이미 가입된 이메일입니다.");
+
+        }
+
+    }
 }
