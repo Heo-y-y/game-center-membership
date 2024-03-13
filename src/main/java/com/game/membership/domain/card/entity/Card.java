@@ -4,14 +4,14 @@ import com.game.membership.domain.game.entity.Game;
 import com.game.membership.domain.member.entity.Member;
 import com.game.membership.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @Table(name = "card_tb")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,13 +30,13 @@ public class Card extends BaseTimeEntity {
     @JoinColumn(name = "game_id")
     private Game game;
 
-    @Column(name = "title", unique = true, nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "serial_number", nullable = false)
+    @Column(name = "serial_number")
     private int serialNumber;
 
-    @Column(name = "price")
-    private double price;
+    @Column(precision = 8, scale = 2)
+    private BigDecimal price;
 
 }

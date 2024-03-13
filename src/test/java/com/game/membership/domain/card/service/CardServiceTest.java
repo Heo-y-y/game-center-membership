@@ -1,0 +1,168 @@
+package com.game.membership.domain.card.service;
+
+import com.game.membership.domain.card.dto.CardFormDto;
+import com.game.membership.domain.card.repository.CardRepository;
+import com.game.membership.domain.member.dto.MemberFormDto;
+import com.game.membership.domain.member.entity.Member;
+import com.game.membership.domain.member.repository.MemberRepository;
+import com.game.membership.domain.member.service.MemberService;
+import com.game.membership.global.error.BusinessException;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+class CardServiceTest {
+
+    @Autowired
+    private CardService cardService;
+    @Autowired
+    private CardRepository cardRepository;
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private MemberRepository memberRepository;
+    private Optional<Member> savedMember;
+
+    @BeforeEach
+    public void beforeEach() {
+        MemberFormDto member = new MemberFormDto();
+        member.setName("testName");
+        member.setEmail("test@gmail.com");
+        memberService.saveMember(member);
+        savedMember = memberRepository.findByEmail(member.getEmail());
+    }
+
+    @AfterEach
+    public void afterEach() {
+        cardRepository.deleteAll();
+        memberRepository.deleteAll();
+    }
+
+
+    @Nested
+    class SaveCard {
+
+        @Test
+        @DisplayName("카드 등록")
+        void saveCardSuccess() {
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(savedMember.get().getId());
+            dto.setPrice(String.valueOf(new BigDecimal(500)));
+            dto.setTitle("티모");
+
+            // when
+            cardService.saveCard(dto);
+        }
+
+        @Test
+        @DisplayName("유저 찾기 실패")
+        void memberNotFound() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(2L);
+            dto.setPrice("500");
+            dto.setTitle("리신");
+
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> cardService.saveCard(dto));
+            assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
+        }
+
+        @Test
+        @DisplayName("게임 찾기 실패")
+        void gameNotFound() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(4L);
+            dto.setMemberId(savedMember.get().getId());
+            dto.setPrice("500");
+            dto.setTitle("리신");
+
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> cardService.saveCard(dto));
+            assertEquals(exception.getMessage(), "해당 게임이 존재하지 않습니다.");
+        }
+
+        @Test
+        @DisplayName("카드 이름 공백")
+        void cardNameBlank() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(1L);
+            dto.setPrice("500");
+            dto.setTitle("");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> cardService.saveCard(dto));
+            assertEquals("카드 이름을 입력해주세요.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("카드 이름 공백")
+        void cardNameFormat() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(1L);
+            dto.setPrice("500");
+            dto.setTitle("ㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁ" +
+                    "ㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁ" +
+                    "ㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁ");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> cardService.saveCard(dto));
+            assertEquals("카드 이름은 1자 이상 100글자 이하여야합니다.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("가격 0부터 확인")
+        void checkCardPrice() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(1L);
+            dto.setPrice("1000000");
+            dto.setTitle("리신");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> cardService.saveCard(dto));
+            assertEquals("가격은 0 이상 100,000 이하여야 합니다.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("숫자 확인")
+        void checkCardPriceNumber() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(1L);
+            dto.setPrice("숫자");
+            dto.setTitle("리신");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(NumberFormatException.class,
+                    () -> cardService.saveCard(dto));
+            assertEquals("숫자만 입력 가능합니다.", exception.getMessage());
+        }
+    }
+}
