@@ -14,5 +14,5 @@ public class MemberListDto {
     private String email;
     private LocalDateTime createdAt;
     private Level level;
-    private int cardCount;
+    private Long cardCount;
 }

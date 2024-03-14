@@ -12,7 +12,6 @@ import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.domain.member.service.MemberService;
 import com.game.membership.global.error.BusinessException;
-import com.game.membership.global.error.ErrorCode;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
