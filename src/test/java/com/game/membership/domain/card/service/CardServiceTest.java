@@ -2,18 +2,24 @@ package com.game.membership.domain.card.service;
 
 import com.game.membership.domain.card.dto.CardFormDto;
 import com.game.membership.domain.card.dto.CardListDto;
+import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
+import com.game.membership.domain.game.entity.Game;
+import com.game.membership.domain.game.repository.GameRepository;
 import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.entity.Member;
+import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.domain.member.service.MemberService;
 import com.game.membership.global.error.BusinessException;
+import com.game.membership.global.error.ErrorCode;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +37,9 @@ class CardServiceTest {
     private MemberService memberService;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private GameRepository gameRepository;
+
     private Optional<Member> savedMember;
 
     @BeforeEach
@@ -88,7 +97,7 @@ class CardServiceTest {
 
             // given
             CardFormDto dto = new CardFormDto();
-            dto.setGameId(4L);
+            dto.setGameId(5L);
             dto.setMemberId(savedMember.get().getId());
             dto.setPrice("500");
             dto.setTitle("리신");
@@ -199,6 +208,48 @@ class CardServiceTest {
             // when, then
             BusinessException exception = assertThrows(BusinessException.class, () -> cardService.getCards(1L));
             assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
+        }
+    }
+
+    @Nested
+    class DeleteCard {
+
+        @Test
+        @DisplayName("카드 삭제")
+        void deleteCardSuccess() {
+
+            // given
+            Member member = new Member();
+            member.setName("test");
+            member.setLevel(Level.BRONZE);
+            member.setEmail("test@gmail");
+            memberRepository.save(member);
+
+            Game game = new Game();
+            game.setName("Test Game");
+            gameRepository.save(game);
+
+            Card card = new Card();
+            card.setGame(game);
+            card.setMember(member);
+            card.setTitle("티모");
+            card.setPrice(BigDecimal.valueOf(400));
+            card.setSerialNumber(4);
+            cardRepository.save(card);
+
+            // when
+            cardService.deleteCard(card.getId());
+
+            // then
+            Optional<Card> deletedCard = cardRepository.findById(card.getId());
+            assertThrows(NoSuchElementException.class, deletedCard::get);
+        }
+
+        @Test
+        @DisplayName("카드 찾기 실패")
+        void cardNotFound() {
+            // When / Then
+            assertThrows(BusinessException.class, () -> cardService.deleteCard(1L));
         }
     }
 }

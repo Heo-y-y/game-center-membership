@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.game.membership.global.response.ResultCode.CARD_SAVE_SUCCESS;
+import static com.game.membership.global.response.ResultCode.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -43,4 +43,15 @@ public class CardController {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
         }
     }
+
+    @DeleteMapping("/{cardId}")
+    public ResponseEntity<ResultResponse> deleteCard(@PathVariable Long cardId) {
+        try {
+            cardService.deleteCard(cardId);
+            return ResponseEntity.ok(new ResultResponse(CARD_DELETE_SUCCESS, null));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
+        }
+    }
+
 }

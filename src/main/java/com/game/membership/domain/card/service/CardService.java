@@ -17,8 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.game.membership.global.error.ErrorCode.GAME_NOT_FOUND;
-import static com.game.membership.global.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.game.membership.global.error.ErrorCode.*;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -59,6 +58,14 @@ public class CardService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         List<Card> cards = cardRepository.findAllByCards(member);
         return cards.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteCard(Long id) {
+        Card card = cardRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(CARD_NOT_FOUND));
+
+        cardRepository.delete(card);
     }
 
     private CardListDto convertToDto(Card card) {
