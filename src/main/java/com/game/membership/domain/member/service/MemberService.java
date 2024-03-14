@@ -1,5 +1,7 @@
 package com.game.membership.domain.member.service;
 
+import com.game.membership.domain.card.entity.Card;
+import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.dto.MemberListConditionDto;
 import com.game.membership.domain.member.dto.MemberListDto;
@@ -26,6 +28,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final CardRepository cardRepository;
 
     @Transactional
     public void saveMember(MemberFormDto dto) {
@@ -76,6 +79,9 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
 
+        List<Card> cards = cardRepository.findAllByMember(member);
+
+        cardRepository.deleteAll(cards);
         memberRepository.delete(member);
     }
 

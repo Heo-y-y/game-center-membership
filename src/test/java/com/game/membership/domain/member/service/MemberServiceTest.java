@@ -1,5 +1,9 @@
 package com.game.membership.domain.member.service;
 
+import com.game.membership.domain.card.dto.CardFormDto;
+import com.game.membership.domain.card.entity.Card;
+import com.game.membership.domain.card.repository.CardRepository;
+import com.game.membership.domain.card.service.CardService;
 import com.game.membership.domain.member.dto.MemberDto;
 import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.dto.MemberListConditionDto;
@@ -29,6 +33,12 @@ class MemberServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private CardRepository cardRepository;
+
+    @Autowired
+    private CardService cardService;
 
     private final MemberListConditionDto condition = new MemberListConditionDto();
 
@@ -206,16 +216,27 @@ class MemberServiceTest {
             MemberFormDto dto = new MemberFormDto();
             dto.setName("testName");
             dto.setEmail("test@gmail.com");
-
-            // when
             memberService.saveMember(dto);
+
             Optional<Member> savedMember = memberRepository.findByEmail(dto.getEmail());
+
+            CardFormDto cardDto = new CardFormDto();
+            cardDto.setGameId(1L);
+            cardDto.setMemberId(savedMember.get().getId());
+            cardDto.setPrice("100");
+            cardDto.setTitle("Test Card");
+
+            cardService.saveCard(cardDto);
+
+            //when
             memberService.deleteMember(savedMember.get().getId());
-            Optional<Member> deletedMember = memberRepository.findById(savedMember.get().getId());
 
             // then
-            assertThat(deletedMember).isEmpty();
+            Optional<Member> deletedMember = memberRepository.findById(savedMember.get().getId());
+            List<Card> savedCards = cardRepository.findAllByMember(savedMember.get());
 
+            assertThat(deletedMember).isEmpty();
+            assertThat(savedCards).isEmpty();
         }
 
         @Test
