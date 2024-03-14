@@ -1,6 +1,7 @@
 package com.game.membership.domain.card.service;
 
 import com.game.membership.domain.card.dto.CardFormDto;
+import com.game.membership.domain.card.dto.CardListDto;
 import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.entity.Member;
@@ -12,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -163,6 +166,39 @@ class CardServiceTest {
             IllegalArgumentException exception = assertThrows(NumberFormatException.class,
                     () -> cardService.saveCard(dto));
             assertEquals("숫자만 입력 가능합니다.", exception.getMessage());
+        }
+    }
+
+    @Nested
+    class GetCards {
+
+        @Test
+        @DisplayName("소유 게임카드 목록")
+        void getCardsSuccess() {
+
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(savedMember.get().getId());
+            dto.setPrice(String.valueOf(new BigDecimal(500)));
+            dto.setTitle("티모");
+            cardService.saveCard(dto);
+
+            // when
+            List<CardListDto> cards = cardService.getCards(savedMember.get().getId());
+
+            // then
+            assertThat(cards.get(0).getTitle()).isEqualTo("티모");
+            assertThat(cards.get(0).getPrice()).isEqualTo("500.00");
+        }
+
+        @Test
+        @DisplayName("유저 찾기 실패")
+        void memberNotFound() {
+
+            // when, then
+            BusinessException exception = assertThrows(BusinessException.class, () -> cardService.getCards(1L));
+            assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
         }
     }
 }
