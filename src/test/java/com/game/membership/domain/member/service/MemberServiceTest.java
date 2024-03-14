@@ -257,4 +257,66 @@ class MemberServiceTest {
             assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
         }
     }
+
+    @Nested
+    class MemberFormValidation {
+
+        @Test
+        @DisplayName("이름 공백")
+        void nameBlank() {
+
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setEmail("test@gmail.com");
+            dto.setName("");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> memberService.saveMember(dto));
+            assertEquals("이름을 입력해주세요.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("이메일 공백")
+        void emailBlank() {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setEmail("");
+            dto.setName("test");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> memberService.saveMember(dto));
+            assertEquals("이메일을 입력해주세요.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("이름 제한 수")
+        void nameCount() {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setEmail("test@gmail.com");
+            dto.setName("t");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> memberService.saveMember(dto));
+            assertEquals("이름은 2자 이상 100글자 이하여야합니다.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("이메일 형식")
+        void emailForm() {
+            // given
+            MemberFormDto dto = new MemberFormDto();
+            dto.setEmail("testgma");
+            dto.setName("test");
+
+            // when, then
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> memberService.saveMember(dto));
+            assertEquals("이메일형식이 올바르지 않습니다.", exception.getMessage());
+        }
+
+    }
 }
