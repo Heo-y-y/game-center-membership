@@ -1,5 +1,7 @@
 package com.game.membership.web.member;
 
+import com.game.membership.domain.card.dto.CardListDto;
+import com.game.membership.domain.card.service.CardService;
 import com.game.membership.domain.member.dto.*;
 import com.game.membership.domain.member.service.MemberService;
 import com.game.membership.global.response.ResultResponse;
@@ -20,6 +22,7 @@ import static com.game.membership.global.response.ResultCode.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final CardService cardService;
 
     @GetMapping("/save")
     public String saveMemberForm() {
@@ -66,7 +69,9 @@ public class MemberController {
     @GetMapping("/{id}")
     public String getMember(@PathVariable Long id, Model model) {
         MemberDto member = memberService.getMember(id);
+        List<CardListDto> cards = cardService.getCards(id);
         model.addAttribute("member", member);
+        model.addAttribute("cards", cards);
         return "member/member_detail";
     }
 
