@@ -1,6 +1,7 @@
 package com.game.membership.domain.card.service;
 
 import com.game.membership.domain.card.dto.CardFormDto;
+import com.game.membership.domain.card.dto.CardListDto;
 import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.game.entity.Game;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.game.membership.global.error.ErrorCode.GAME_NOT_FOUND;
 import static com.game.membership.global.error.ErrorCode.MEMBER_NOT_FOUND;
@@ -52,6 +55,13 @@ public class CardService {
         cardRepository.save(card);
     }
 
+    public List<CardListDto> getCards(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+        List<Card> cards = cardRepository.findAllByCards(member);
+        return cards.stream().map(this::convertToDto).collect(Collectors.toList());
+
+    }
+
     private static void cardFormValidation(CardFormDto dto) {
         BigDecimal price;
 
@@ -69,5 +79,15 @@ public class CardService {
         if (price.compareTo(MIN_PRICE) < 0 || price.compareTo(MAX_PRICE) > 0) {
             throw new IllegalArgumentException("가격은 0 이상 100,000 이하여야 합니다.");
         }
+    }
+
+    private CardListDto convertToDto(Card card) {
+        CardListDto dto = new CardListDto();
+        dto.setId(card.getId());
+        dto.setTitle(card.getTitle());
+        dto.setPrice(card.getPrice());
+        dto.setGame(card.getGame());
+        dto.setSerialNumber(card.getSerialNumber());
+        return dto;
     }
 }
