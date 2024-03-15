@@ -5,11 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CardFormDto {
+public class MemberCardListDto {
 
-    private Long gameId;
+    private Long id;
 
     private String title;
-
-    private String price;
 }

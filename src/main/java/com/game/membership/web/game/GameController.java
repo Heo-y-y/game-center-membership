@@ -19,7 +19,7 @@ public class GameController {
 
     @GetMapping
     public String getGameList(Model model) {
-        List<GameListDto> games = gameService.getGameList();
+        List<GameListDto> games = gameService.getGames();
         model.addAttribute("games", games);
 
         return "game/game_list";

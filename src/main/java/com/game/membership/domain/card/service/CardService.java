@@ -2,6 +2,8 @@ package com.game.membership.domain.card.service;
 
 import com.game.membership.domain.card.dto.CardFormDto;
 import com.game.membership.domain.card.dto.CardListDto;
+import com.game.membership.domain.card.dto.MemberCardFormDto;
+import com.game.membership.domain.card.dto.MemberCardListDto;
 import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.game.entity.Game;
@@ -40,18 +42,25 @@ public class CardService {
     public void saveCard(CardFormDto dto) {
         cardFormValidation(dto);
 
-        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         Game game = gameRepository.findById(dto.getGameId()).orElseThrow(() -> new BusinessException(GAME_NOT_FOUND));
 
         Card card = Card.builder()
                 .title(dto.getTitle())
                 .game(game)
-                .member(member)
                 .serialNumber(this.randomNumber(game))
                 .price(new BigDecimal(dto.getPrice()))
                 .build();
 
         cardRepository.save(card);
+    }
+
+    @Transactional
+    public void saveMemberCard(MemberCardFormDto dto) {
+
+        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+        Card card = cardRepository.findById(dto.getCardId()).orElseThrow(() -> new BusinessException(CARD_NOT_FOUND));
+
+        card.setMember(member);
 
         this.setLevel(member);
     }
@@ -63,13 +72,15 @@ public class CardService {
     }
 
     @Transactional
-    public void deleteCard(Long id) {
-        Card card = cardRepository.findById(id)
+    public void deleteCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new BusinessException(CARD_NOT_FOUND));
 
-        cardRepository.delete(card);
+        Member member = card.getMember();
 
-        this.setLevel(card.getMember());
+        card.setMember(null);
+
+        this.setLevel(member);
     }
 
     private CardListDto convertToDto(Card card) {
@@ -141,4 +152,16 @@ public class CardService {
         return serialNumber;
     }
 
+    public List<MemberCardListDto> getGameCards(Long gameId) {
+        List<Card> cards = cardRepository.findAllByGameIdAndMemberIdIsNull(gameId);
+        return cards.stream().map(this::convertMemberCardListDto).collect(Collectors.toList());
+    }
+
+    private MemberCardListDto convertMemberCardListDto(Card card) {
+        MemberCardListDto dto = new MemberCardListDto();
+        dto.setId(card.getId());
+        dto.setTitle(card.getTitle());
+
+        return dto;
+    }
 }
