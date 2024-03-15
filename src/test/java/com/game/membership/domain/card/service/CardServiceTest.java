@@ -75,6 +75,70 @@ class CardServiceTest {
         }
 
         @Test
+        @DisplayName("저장 후 골드 확인")
+        void checkSetLevelGold() {
+            // given
+            CardFormDto dto1 = new CardFormDto();
+            dto1.setGameId(2L);
+            dto1.setMemberId(savedMember.get().getId());
+            dto1.setPrice(String.valueOf(new BigDecimal(500)));
+            dto1.setTitle("티모");
+
+            CardFormDto dto2 = new CardFormDto();
+            dto2.setGameId(3L);
+            dto2.setMemberId(savedMember.get().getId());
+            dto2.setPrice(String.valueOf(new BigDecimal(500)));
+            dto2.setTitle("리신");
+
+            // when
+            cardService.saveCard(dto1);
+            cardService.saveCard(dto2);
+
+            // then
+            Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
+
+            assertThat(member.get().getLevel()).isEqualTo(Level.GOLD);
+        }
+
+        @Test
+        @DisplayName("저장 후 실버 확인")
+        void checkSetLevelSilver() {
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(savedMember.get().getId());
+            dto.setPrice(String.valueOf(new BigDecimal(500)));
+            dto.setTitle("티모");
+
+            // when
+            cardService.saveCard(dto);
+
+            // then
+            Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
+
+            assertThat(member.get().getLevel()).isEqualTo(Level.SILVER);
+        }
+
+        @Test
+        @DisplayName("저장 후 브론즈 확인")
+        void checkSetLevelBronze() {
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(savedMember.get().getId());
+            dto.setPrice(String.valueOf(new BigDecimal(0)));
+            dto.setTitle("티모");
+
+            // when
+            cardService.saveCard(dto);
+
+            // then
+            Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
+
+            assertThat(member.get().getLevel()).isEqualTo(Level.BRONZE);
+        }
+
+        @Test
         @DisplayName("유저 찾기 실패")
         void memberNotFound() {
 
@@ -242,6 +306,89 @@ class CardServiceTest {
             // then
             Optional<Card> deletedCard = cardRepository.findById(card.getId());
             assertThrows(NoSuchElementException.class, deletedCard::get);
+        }
+
+        @Test
+        @DisplayName("삭제 후 골드 확인")
+        void checkSetLevelGold() {
+            // given
+            CardFormDto dto1 = new CardFormDto();
+            dto1.setGameId(2L);
+            dto1.setMemberId(savedMember.get().getId());
+            dto1.setPrice(String.valueOf(new BigDecimal(100)));
+            dto1.setTitle("티모");
+
+            CardFormDto dto2 = new CardFormDto();
+            dto2.setGameId(1L);
+            dto2.setMemberId(savedMember.get().getId());
+            dto2.setPrice(String.valueOf(new BigDecimal(100)));
+            dto2.setTitle("리신");
+
+            CardFormDto dto3 = new CardFormDto();
+            dto3.setGameId(1L);
+            dto3.setMemberId(savedMember.get().getId());
+            dto3.setPrice(String.valueOf(new BigDecimal(100)));
+            dto3.setTitle("야스오");
+
+            cardService.saveCard(dto1);
+            cardService.saveCard(dto2);
+            cardService.saveCard(dto3);
+
+            // when
+            List<Card> cards = cardRepository.findAllByMember(savedMember.get());
+            cardService.deleteCard(cards.get(1).getId());
+
+            // then
+            Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
+            assertThat(member.get().getLevel()).isEqualTo(Level.GOLD);
+        }
+
+        @Test
+        @DisplayName("삭제 후 실버 확인")
+        void checkSetLevelSilver() {
+            // given
+            CardFormDto dto1 = new CardFormDto();
+            dto1.setGameId(2L);
+            dto1.setMemberId(savedMember.get().getId());
+            dto1.setPrice(String.valueOf(new BigDecimal(100)));
+            dto1.setTitle("티모");
+
+            CardFormDto dto2 = new CardFormDto();
+            dto2.setGameId(1L);
+            dto2.setMemberId(savedMember.get().getId());
+            dto2.setPrice(String.valueOf(new BigDecimal(100)));
+            dto2.setTitle("리신");
+
+            cardService.saveCard(dto1);
+            cardService.saveCard(dto2);
+
+            // when
+            List<Card> cards = cardRepository.findAllByMember(savedMember.get());
+            cardService.deleteCard(cards.get(0).getId());
+
+            // then
+            Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
+            assertThat(member.get().getLevel()).isEqualTo(Level.SILVER);
+        }
+
+        @Test
+        @DisplayName("삭제 후 브론즈 확인")
+        void checkSetLevelBronze() {
+            // given
+            CardFormDto dto = new CardFormDto();
+            dto.setGameId(2L);
+            dto.setMemberId(savedMember.get().getId());
+            dto.setPrice(String.valueOf(new BigDecimal(100)));
+            dto.setTitle("티모");
+            cardService.saveCard(dto);
+
+            // when
+            List<Card> cards = cardRepository.findAllByMember(savedMember.get());
+            cardService.deleteCard(cards.get(0).getId());
+
+            // then
+            Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
+            assertThat(member.get().getLevel()).isEqualTo(Level.BRONZE);
         }
 
         @Test

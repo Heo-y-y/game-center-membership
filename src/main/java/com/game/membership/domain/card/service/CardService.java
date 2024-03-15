@@ -7,9 +7,11 @@ import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.game.entity.Game;
 import com.game.membership.domain.game.repository.GameRepository;
 import com.game.membership.domain.member.entity.Member;
+import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.global.error.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 import static com.game.membership.global.error.ErrorCode.*;
 import static org.springframework.util.StringUtils.hasText;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -39,24 +42,23 @@ public class CardService {
 
         Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         Game game = gameRepository.findById(dto.getGameId()).orElseThrow(() -> new BusinessException(GAME_NOT_FOUND));
-        Card lastCard = cardRepository.findTopByGameOrderByIdDesc(game).orElse(null);
-
-        int serialNumber = lastCard != null ? lastCard.getSerialNumber() + 1 : 1;
 
         Card card = Card.builder()
                 .title(dto.getTitle())
                 .game(game)
                 .member(member)
-                .serialNumber(serialNumber)
+                .serialNumber(this.randomNumber(game))
                 .price(new BigDecimal(dto.getPrice()))
                 .build();
 
         cardRepository.save(card);
+
+        this.setLevel(member);
     }
 
     public List<CardListDto> getCards(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
-        List<Card> cards = cardRepository.findAllByCards(member);
+        List<Card> cards = cardRepository.findByMemberOrderByIdDesc(member);
         return cards.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -66,6 +68,8 @@ public class CardService {
                 .orElseThrow(() -> new BusinessException(CARD_NOT_FOUND));
 
         cardRepository.delete(card);
+
+        this.setLevel(card.getMember());
     }
 
     private CardListDto convertToDto(Card card) {
@@ -96,4 +100,45 @@ public class CardService {
             throw new IllegalArgumentException("가격은 0 이상 100,000 이하여야 합니다.");
         }
     }
+
+    private void setLevel(Member member) {
+        List<CardListDto> cards = this.getCards(member.getId());
+        Long memberWithGoldCount = cardRepository.countDistinctGamesByMember(member);
+        long differentCardCount = memberWithGoldCount != null ? memberWithGoldCount : 0;
+
+        List<CardListDto> validGameCard = cards.stream()
+                .filter(card -> card.getPrice().compareTo(BigDecimal.ZERO) > 0)
+                .toList();
+
+        BigDecimal totalPrice = validGameCard.stream()
+                .map(CardListDto::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (differentCardCount >= 2 && (validGameCard.size() >= 4 ||
+                validGameCard.size() >=2 && validGameCard.size() <= 3 &&
+                        totalPrice.compareTo(new BigDecimal(100)) > 0)) {
+            member.setLevel(Level.GOLD);
+        }
+        else if(!validGameCard.isEmpty()) {
+            member.setLevel(Level.SILVER);
+        }
+        else {
+            member.setLevel(Level.BRONZE);
+        }
+    }
+
+    private int randomNumber(Game game) {
+        int serialNumber = 0;
+
+        while(true) {
+            serialNumber = (int) (Math.random() * 1000000);
+            boolean cardExists = cardRepository.existsByGameAndSerialNumber(game, serialNumber);
+
+            if(!cardExists) {
+                break;
+            }
+        }
+        return serialNumber;
+    }
+
 }
