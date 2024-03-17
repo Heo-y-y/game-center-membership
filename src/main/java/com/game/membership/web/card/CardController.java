@@ -1,8 +1,6 @@
 package com.game.membership.web.card;
 
 import com.game.membership.domain.card.dto.CardFormDto;
-import com.game.membership.domain.card.dto.MemberCardFormDto;
-import com.game.membership.domain.card.dto.MemberCardListDto;
 import com.game.membership.domain.card.service.CardService;
 import com.game.membership.domain.game.dto.GameListDto;
 import com.game.membership.domain.game.service.GameService;
@@ -26,26 +24,12 @@ public class CardController {
 
     private final GameService gameService;
 
-    @GetMapping("/save")
-    public String saveCardForm(Model model) {
-        List<GameListDto> games = gameService.getGames();
+    @GetMapping("/save/{memberId}")
+    public String saveCardForm(@PathVariable @ModelAttribute Long memberId, Model model) {
+        List<GameListDto> games = gameService.getGameList();
         model.addAttribute("games", games);
 
         return "card/card_save";
-    }
-
-    @GetMapping("/save/member/{memberId}")
-    public String saveMemberCardForm(@PathVariable @ModelAttribute Long memberId, Model model) {
-        List<GameListDto> games = gameService.getGames();
-        model.addAttribute("games", games);
-
-        return "card/card_member_save";
-    }
-
-    @GetMapping("/cards/{gameId}")
-    @ResponseBody
-    public List<MemberCardListDto> getCardsByGameId(@PathVariable Long gameId) {
-        return cardService.getGameCards(gameId);
     }
 
     @PostMapping("/save")
@@ -53,17 +37,6 @@ public class CardController {
     public ResponseEntity<ResultResponse> saveCard(CardFormDto dto) {
         try {
             cardService.saveCard(dto);
-            return ResponseEntity.ok(new ResultResponse(CARD_SAVE_SUCCESS, "/member/list"));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
-        }
-    }
-
-    @PostMapping("/save/member")
-    @ResponseBody
-    public ResponseEntity<ResultResponse> saveMemberCard(MemberCardFormDto dto) {
-        try {
-            cardService.saveMemberCard(dto);
             return ResponseEntity.ok(new ResultResponse(CARD_SAVE_SUCCESS, "/member/" + dto.getMemberId()));
         } catch (Exception e) {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));

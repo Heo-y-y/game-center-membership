@@ -2,8 +2,6 @@ package com.game.membership.domain.card.service;
 
 import com.game.membership.domain.card.dto.CardFormDto;
 import com.game.membership.domain.card.dto.CardListDto;
-import com.game.membership.domain.card.dto.MemberCardFormDto;
-import com.game.membership.domain.card.dto.MemberCardListDto;
 import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.game.entity.Game;
@@ -11,6 +9,8 @@ import com.game.membership.domain.game.repository.GameRepository;
 import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
+import com.game.membership.domain.slack.enumset.MessageTemplate;
+import com.game.membership.domain.slack.service.SlackService;
 import com.game.membership.global.error.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,7 @@ public class CardService {
     private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
     private final GameRepository gameRepository;
+    private final SlackService slackService;
 
     private static final BigDecimal MAX_PRICE = new BigDecimal("100000");
     private static final BigDecimal MIN_PRICE = BigDecimal.ZERO;
@@ -42,27 +44,21 @@ public class CardService {
     public void saveCard(CardFormDto dto) {
         cardFormValidation(dto);
 
+        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         Game game = gameRepository.findById(dto.getGameId()).orElseThrow(() -> new BusinessException(GAME_NOT_FOUND));
 
         Card card = Card.builder()
                 .title(dto.getTitle())
                 .game(game)
+                .member(member)
                 .serialNumber(this.randomNumber(game))
                 .price(new BigDecimal(dto.getPrice()))
+                .createdAt(LocalDate.now())
                 .build();
 
         cardRepository.save(card);
-    }
 
-    @Transactional
-    public void saveMemberCard(MemberCardFormDto dto) {
-
-        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
-        Card card = cardRepository.findById(dto.getCardId()).orElseThrow(() -> new BusinessException(CARD_NOT_FOUND));
-
-        card.setMember(member);
-
-        this.setLevel(member);
+        this.setLevel(card.getMember(), MessageTemplate.UP);
     }
 
     public List<CardListDto> getCards(Long memberId) {
@@ -72,15 +68,13 @@ public class CardService {
     }
 
     @Transactional
-    public void deleteCard(Long cardId) {
-        Card card = cardRepository.findById(cardId)
+    public void deleteCard(Long id) {
+        Card card = cardRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(CARD_NOT_FOUND));
 
-        Member member = card.getMember();
+        cardRepository.delete(card);
 
-        card.setMember(null);
-
-        this.setLevel(member);
+        this.setLevel(card.getMember(), MessageTemplate.DOWN);
     }
 
     private CardListDto convertToDto(Card card) {
@@ -98,7 +92,7 @@ public class CardService {
 
         try {
             price = new BigDecimal(dto.getPrice());
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new NumberFormatException("숫자만 입력 가능합니다.");
         }
         if (!hasText(dto.getTitle())) {
@@ -112,7 +106,7 @@ public class CardService {
         }
     }
 
-    private void setLevel(Member member) {
+    private void setLevel(Member member, MessageTemplate messageTemplate) {
         List<CardListDto> cards = this.getCards(member.getId());
         Long memberWithGoldCount = cardRepository.countDistinctGamesByMember(member);
         long differentCardCount = memberWithGoldCount != null ? memberWithGoldCount : 0;
@@ -125,43 +119,36 @@ public class CardService {
                 .map(CardListDto::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        Level beforeLevel = member.getLevel();
+        Level afterLevel;
+
         if (differentCardCount >= 2 && (validGameCard.size() >= 4 ||
-                validGameCard.size() >=2 && validGameCard.size() <= 3 &&
+                validGameCard.size() >= 2 && validGameCard.size() <= 3 &&
                         totalPrice.compareTo(new BigDecimal(100)) > 0)) {
-            member.setLevel(Level.GOLD);
+            afterLevel = Level.GOLD;
+        } else if (!validGameCard.isEmpty()) {
+            afterLevel = Level.SILVER;
+        } else {
+            afterLevel = Level.BRONZE;
         }
-        else if(!validGameCard.isEmpty()) {
-            member.setLevel(Level.SILVER);
-        }
-        else {
-            member.setLevel(Level.BRONZE);
+
+        if (afterLevel != beforeLevel) {
+            member.setLevel(afterLevel);
+            slackService.sendMessage(slackService.createSlackMessage(member, messageTemplate));
         }
     }
 
     private int randomNumber(Game game) {
         int serialNumber = 0;
 
-        while(true) {
+        while (true) {
             serialNumber = (int) (Math.random() * 1000000);
             boolean cardExists = cardRepository.existsByGameAndSerialNumber(game, serialNumber);
 
-            if(!cardExists) {
+            if (!cardExists) {
                 break;
             }
         }
         return serialNumber;
-    }
-
-    public List<MemberCardListDto> getGameCards(Long gameId) {
-        List<Card> cards = cardRepository.findAllByGameIdAndMemberIdIsNull(gameId);
-        return cards.stream().map(this::convertMemberCardListDto).collect(Collectors.toList());
-    }
-
-    private MemberCardListDto convertMemberCardListDto(Card card) {
-        MemberCardListDto dto = new MemberCardListDto();
-        dto.setId(card.getId());
-        dto.setTitle(card.getTitle());
-
-        return dto;
     }
 }

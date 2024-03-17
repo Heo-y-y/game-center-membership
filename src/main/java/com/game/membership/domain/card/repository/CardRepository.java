@@ -18,7 +18,4 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Long countDistinctGamesByMember(Member member);
 
     boolean existsByGameAndSerialNumber(Game game, int serialNumber);
-
-
-    List<Card> findAllByGameIdAndMemberIdIsNull(Long gameId);
 }

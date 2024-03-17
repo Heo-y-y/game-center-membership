@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CardFormDto {
+    private Long memberId;
 
     private Long gameId;
 

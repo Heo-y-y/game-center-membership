@@ -18,7 +18,7 @@ public class GameService {
 
     private final GameRepository gameRepository;
 
-    public List<GameListDto> getGames() {
+    public List<GameListDto> getGameList() {
         List<Game> games = gameRepository.findAll(Sort.by("id"));
         return games.stream().map(this::convertToDto).collect(Collectors.toList());
     }

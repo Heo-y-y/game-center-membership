@@ -1,9 +1,12 @@
 package com.game.membership.domain.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.game.membership.domain.member.enumset.Level;
-import com.game.membership.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -12,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "member_tb")
-public class Member extends BaseTimeEntity {
+public class Member{
     @Id
     @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +30,12 @@ public class Member extends BaseTimeEntity {
     @Column(name = "level")
     @Enumerated(EnumType.STRING)
     private Level level;
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDate createdAt;
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
 }

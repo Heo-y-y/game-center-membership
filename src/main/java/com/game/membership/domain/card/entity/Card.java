@@ -2,11 +2,11 @@ package com.game.membership.domain.card.entity;
 
 import com.game.membership.domain.game.entity.Game;
 import com.game.membership.domain.member.entity.Member;
-import com.game.membership.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -15,14 +15,14 @@ import java.math.BigDecimal;
 @Table(name = "card_tb")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Card extends BaseTimeEntity {
+public class Card {
 
     @Id
     @Column(name = "card_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -38,5 +38,8 @@ public class Card extends BaseTimeEntity {
 
     @Column(precision = 8, scale = 2)
     private BigDecimal price;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDate createdAt;
 
 }

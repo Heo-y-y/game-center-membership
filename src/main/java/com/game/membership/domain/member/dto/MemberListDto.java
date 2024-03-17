@@ -4,7 +4,7 @@ import com.game.membership.domain.member.enumset.Level;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -12,7 +12,7 @@ public class MemberListDto {
     private Long id;
     private String name;
     private String email;
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     private Level level;
     private Long cardCount;
 }

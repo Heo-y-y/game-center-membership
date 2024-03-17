@@ -8,12 +8,12 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class MemberFormDto {
+public class MemberUpdateDto {
 
     private String name;
 
     private String email;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate date;
+    private LocalDate updatedAt;
 }
