@@ -338,6 +338,5 @@ class MemberServiceTest {
                     () -> memberService.saveMember(dto));
             assertEquals("이메일형식이 올바르지 않습니다.", exception.getMessage());
         }
-
     }
 }

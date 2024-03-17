@@ -11,6 +11,7 @@ import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.domain.member.service.MemberService;
+import com.game.membership.domain.slack.service.SlackService;
 import com.game.membership.global.error.BusinessException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ class CardServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private GameRepository gameRepository;
+    @Autowired
+    private SlackService slackService;
 
     private Optional<Member> savedMember;
 
@@ -98,6 +101,7 @@ class CardServiceTest {
             Optional<Member> member = memberRepository.findByEmail(savedMember.get().getEmail());
 
             assertThat(member.get().getLevel()).isEqualTo(Level.GOLD);
+
         }
 
         @Test
