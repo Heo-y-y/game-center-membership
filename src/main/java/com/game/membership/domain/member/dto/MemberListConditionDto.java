@@ -8,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class MemberListConditionDto {
     private String name;
+
     private Level level;
 }

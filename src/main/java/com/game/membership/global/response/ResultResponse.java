@@ -6,7 +6,9 @@ import lombok.Getter;
 public class ResultResponse {
 
     private int status;
+
     private String message;
+
     private Object data;
 
     public ResultResponse(ResultCode resultCode, Object data) {
@@ -18,10 +20,6 @@ public class ResultResponse {
     public ResultResponse(int resultCode, String message) {
         this.status = resultCode;
         this.message = message;
-    }
-
-    public ResultResponse(int resultCode) {
-        this.status = resultCode;
     }
 
     public static ResultResponse of(ResultCode resultCode, Object data) {

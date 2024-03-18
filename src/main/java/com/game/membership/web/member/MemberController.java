@@ -24,11 +24,21 @@ public class MemberController {
     private final MemberService memberService;
     private final CardService cardService;
 
+    /**
+     * 회원 등록 UI
+     *
+     * @return 회원 등록 폼
+     */
     @GetMapping("/save")
     public String saveMemberForm() {
         return "member/member_save";
     }
 
+    /**
+     * 회원 등록
+     *
+     * @return 회원 목록
+     */
     @PostMapping("/save")
     @ResponseBody
     public ResponseEntity<ResultResponse> saveMember(MemberFormDto dto) {
@@ -40,14 +50,24 @@ public class MemberController {
         }
     }
 
-    @GetMapping("/view/{id}")
+    /**
+     * 회원 수정 UI
+     *
+     * @return 회원 수정 폼
+     */
+    @GetMapping("/update/{id}")
     public String viewMember(@PathVariable(name = "id") Long id, Model model) {
         MemberDto member = memberService.getMember(id);
         model.addAttribute("member", member);
         return "member/member_update";
     }
 
-    @PatchMapping("/view/{id}")
+    /**
+     * 회원 수정
+     *
+     * @return 회원 정보 조회
+     */
+    @PatchMapping("/update/{id}")
     @ResponseBody
     public ResponseEntity<ResultResponse> updateMember(MemberFormDto dto, @PathVariable(name = "id") Long id) {
         try {
@@ -58,6 +78,11 @@ public class MemberController {
         }
     }
 
+    /**
+     * 회원 목록 UI
+     *
+     * @return 회원 목록
+     */
     @GetMapping("/list")
     public String getMembers(Model model, MemberListConditionDto condition) {
         List<MemberListDto> members = memberService.searchAllMembers(condition);
@@ -66,6 +91,11 @@ public class MemberController {
         return "member/member_list";
     }
 
+    /**
+     * 회원 정보 UI
+     *
+     * @return 회원 정보
+     */
     @GetMapping("/{id}")
     public String getMember(@PathVariable Long id, Model model) {
         MemberDto member = memberService.getMember(id);
@@ -75,11 +105,17 @@ public class MemberController {
         return "member/member_detail";
     }
 
+    /**
+     * 회원 삭제
+     *
+     * @return 회원 목록
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<ResultResponse> deleteMember(@PathVariable Long id) {
         try {
             memberService.deleteMember(id);
             return ResponseEntity.ok(new ResultResponse(MEMBER_DELETE_SUCCESS, "/member/list"));
+
         } catch (Exception e) {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
         }

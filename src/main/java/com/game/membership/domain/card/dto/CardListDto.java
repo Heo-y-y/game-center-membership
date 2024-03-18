@@ -9,10 +9,13 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class CardListDto {
-
     private Long id;
+
     private Game game;
+
     private String title;
+
     private int serialNumber;
+
     private BigDecimal price;
 }

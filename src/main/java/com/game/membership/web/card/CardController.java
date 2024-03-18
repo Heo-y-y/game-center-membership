@@ -24,6 +24,11 @@ public class CardController {
 
     private final GameService gameService;
 
+    /**
+     * 카드 등록 폼 UI
+     *
+     * @return 카드 등록 폼
+     */
     @GetMapping("/save/{memberId}")
     public String saveCardForm(@PathVariable @ModelAttribute Long memberId, Model model) {
         List<GameListDto> games = gameService.getGameList();
@@ -32,25 +37,34 @@ public class CardController {
         return "card/card_save";
     }
 
+    /**
+     * 카드 등록
+     *
+     * @return 회원 정보 조회
+     */
     @PostMapping("/save")
     @ResponseBody
     public ResponseEntity<ResultResponse> saveCard(CardFormDto dto) {
         try {
             cardService.saveCard(dto);
             return ResponseEntity.ok(new ResultResponse(CARD_SAVE_SUCCESS, "/member/" + dto.getMemberId()));
+
         } catch (Exception e) {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
         }
     }
 
+    /**
+     * 카드 삭제
+     */
     @DeleteMapping("/{cardId}")
     public ResponseEntity<ResultResponse> deleteCard(@PathVariable Long cardId) {
         try {
             cardService.deleteCard(cardId);
             return ResponseEntity.ok(new ResultResponse(CARD_DELETE_SUCCESS, null));
+
         } catch (Exception e) {
             return ResponseEntity.ok(new ResultResponse(500, e.getMessage()));
         }
     }
-
 }

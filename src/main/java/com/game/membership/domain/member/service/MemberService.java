@@ -2,8 +2,10 @@ package com.game.membership.domain.member.service;
 
 import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
-import com.game.membership.domain.card.service.CardService;
-import com.game.membership.domain.member.dto.*;
+import com.game.membership.domain.member.dto.MemberDto;
+import com.game.membership.domain.member.dto.MemberFormDto;
+import com.game.membership.domain.member.dto.MemberListConditionDto;
+import com.game.membership.domain.member.dto.MemberListDto;
 import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
@@ -31,12 +33,13 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
-    private final CardService cardService;
     private final SlackService slackService;
 
+    /**
+     * 회원 등록
+     */
     @Transactional
     public void saveMember(MemberFormDto dto) {
-
         memberFormValidation(dto);
 
         Optional<Member> existMember = memberRepository.findByEmail(dto.getEmail());
@@ -54,9 +57,11 @@ public class MemberService {
         slackService.sendMessage(slackService.createSlackMessage(saveMember, MessageTemplate.NEW));
     }
 
+    /**
+     * 회원 수정
+     */
     @Transactional
     public void updateMember(MemberFormDto dto, Long id) {
-
         memberFormValidation(dto);
 
         Member member = memberRepository.findById(id)
@@ -71,16 +76,26 @@ public class MemberService {
         member.setUpdatedAt(dto.getDate());
     }
 
+    /**
+     * 회원 정보 조회
+     */
     public MemberDto getMember(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+
         return convertToMemberDto(member);
     }
 
+    /**
+     * 회원 목록 조회 & 검색
+     */
     public List<MemberListDto> searchAllMembers(MemberListConditionDto condition) {
         return memberRepository.searchAllMembers(condition);
     }
 
+    /**
+     * 회원 삭제
+     */
     @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
@@ -92,14 +107,9 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
-    private MemberDto convertToMemberDto(Member member) {
-        MemberDto dto = new MemberDto();
-        dto.setId(member.getId());
-        dto.setName(member.getName());
-        dto.setEmail(member.getEmail());
-        return dto;
-    }
-
+    /**
+     * 회원 입력 폼 유효성 검사
+     */
     private static void memberFormValidation(MemberFormDto dto) {
         if (!hasText(dto.getName()))
             throw new IllegalArgumentException("이름을 입력해주세요.");
@@ -123,5 +133,13 @@ public class MemberService {
         if (dto.getDate().isBefore(allowedDate) ||  dto.getDate().isAfter(currentDate)) {
             throw new IllegalArgumentException("가입일자는 현재 날짜로부터 1년 이내여야 합니다.");
         }
+    }
+
+    private MemberDto convertToMemberDto(Member member) {
+        MemberDto dto = new MemberDto();
+        dto.setId(member.getId());
+        dto.setName(member.getName());
+        dto.setEmail(member.getEmail());
+        return dto;
     }
 }

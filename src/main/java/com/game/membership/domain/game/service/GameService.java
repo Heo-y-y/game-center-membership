@@ -18,8 +18,12 @@ public class GameService {
 
     private final GameRepository gameRepository;
 
+    /**
+     * 게임 목록
+     **/
     public List<GameListDto> getGameList() {
         List<Game> games = gameRepository.findAll(Sort.by("id"));
+
         return games.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -27,6 +31,7 @@ public class GameService {
         GameListDto dto = new GameListDto();
         dto.setId(game.getId());
         dto.setName(game.getName());
+
         return dto;
     }
 }

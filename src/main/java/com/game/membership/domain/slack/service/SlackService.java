@@ -39,7 +39,9 @@ public class SlackService {
      **/
     public String createSlackMessage(Member member, MessageTemplate messageTemplate) {
         String message = messageTemplate.getMessage();
+
         if (member == null) throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+
         message = message.replace("{member.id}", String.valueOf(member.getId()));
         message = message.replace("{member.name}", member.getName());
         message = message.replace("{member.level}", member.getLevel().name());

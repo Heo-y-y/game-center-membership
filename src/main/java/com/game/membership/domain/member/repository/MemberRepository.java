@@ -8,7 +8,8 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>,
         QuerydslPredicateExecutor<Member>, MemberRepositoryCustom {
-    Optional<Member> findByEmail(String email);
-    boolean existsByEmail(String email);
 
+    Optional<Member> findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }

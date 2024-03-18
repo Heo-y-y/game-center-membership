@@ -16,6 +16,7 @@ import java.util.List;
 import static com.game.membership.domain.card.entity.QCard.card;
 import static com.game.membership.domain.member.entity.QMember.member;
 
+
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepositoryCustom {
 

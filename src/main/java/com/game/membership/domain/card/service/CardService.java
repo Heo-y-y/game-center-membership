@@ -40,6 +40,9 @@ public class CardService {
     private static final BigDecimal MIN_PRICE = BigDecimal.ZERO;
 
 
+    /**
+     * 카드 등록
+     **/
     @Transactional
     public void saveCard(CardFormDto dto) {
         cardFormValidation(dto);
@@ -51,7 +54,7 @@ public class CardService {
                 .title(dto.getTitle())
                 .game(game)
                 .member(member)
-                .serialNumber(this.randomNumber(game))
+                .serialNumber(this.genRandomNumber(game))
                 .price(new BigDecimal(dto.getPrice()))
                 .createdAt(LocalDate.now())
                 .build();
@@ -61,12 +64,19 @@ public class CardService {
         this.setLevel(card.getMember(), MessageTemplate.UP);
     }
 
+    /**
+     * 소유 카드 목록
+     **/
     public List<CardListDto> getCards(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         List<Card> cards = cardRepository.findByMemberOrderByIdDesc(member);
+
         return cards.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    /**
+     * 카드 삭제
+     **/
     @Transactional
     public void deleteCard(Long id) {
         Card card = cardRepository.findById(id)
@@ -77,16 +87,9 @@ public class CardService {
         this.setLevel(card.getMember(), MessageTemplate.DOWN);
     }
 
-    private CardListDto convertToDto(Card card) {
-        CardListDto dto = new CardListDto();
-        dto.setId(card.getId());
-        dto.setTitle(card.getTitle());
-        dto.setPrice(card.getPrice());
-        dto.setGame(card.getGame());
-        dto.setSerialNumber(card.getSerialNumber());
-        return dto;
-    }
-
+    /**
+     * 카드 폼 유효성 검사
+     **/
     private static void cardFormValidation(CardFormDto dto) {
         BigDecimal price;
 
@@ -106,10 +109,13 @@ public class CardService {
         }
     }
 
+    /**
+     * 회원 레벨 부여 규칙 및 레벨 변경 통보
+     **/
     private void setLevel(Member member, MessageTemplate messageTemplate) {
         List<CardListDto> cards = this.getCards(member.getId());
-        Long memberWithGoldCount = cardRepository.countDistinctGamesByMember(member);
-        long differentCardCount = memberWithGoldCount != null ? memberWithGoldCount : 0;
+        Long gameCount = cardRepository.countDistinctGamesByMember(member);
+        long differentGameCount = gameCount != null ? gameCount : 0;
 
         List<CardListDto> validGameCard = cards.stream()
                 .filter(card -> card.getPrice().compareTo(BigDecimal.ZERO) > 0)
@@ -122,7 +128,7 @@ public class CardService {
         Level beforeLevel = member.getLevel();
         Level afterLevel;
 
-        if (differentCardCount >= 2 && (validGameCard.size() >= 4 ||
+        if (differentGameCount >= 2 && (validGameCard.size() >= 4 ||
                 validGameCard.size() >= 2 && validGameCard.size() <= 3 &&
                         totalPrice.compareTo(new BigDecimal(100)) > 0)) {
             afterLevel = Level.GOLD;
@@ -138,7 +144,10 @@ public class CardService {
         }
     }
 
-    private int randomNumber(Game game) {
+    /**
+     * 카드 일련 번호 생성
+     **/
+    private int genRandomNumber(Game game) {
         int serialNumber = 0;
 
         while (true) {
@@ -151,4 +160,17 @@ public class CardService {
         }
         return serialNumber;
     }
+
+    private CardListDto convertToDto(Card card) {
+        CardListDto dto = new CardListDto();
+        dto.setId(card.getId());
+        dto.setTitle(card.getTitle());
+        dto.setPrice(card.getPrice());
+        dto.setGame(card.getGame());
+        dto.setSerialNumber(card.getSerialNumber());
+
+        return dto;
+    }
+
+
 }

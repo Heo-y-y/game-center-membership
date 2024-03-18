@@ -9,10 +9,15 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class MemberListDto {
+
     private Long id;
     private String name;
+
     private String email;
+
     private LocalDate createdAt;
+
     private Level level;
+
     private Long cardCount;
 }
