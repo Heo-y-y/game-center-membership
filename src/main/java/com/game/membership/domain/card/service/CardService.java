@@ -93,17 +93,19 @@ public class CardService {
     private static void cardFormValidation(CardFormDto dto) {
         BigDecimal price;
 
-        try {
-            price = new BigDecimal(dto.getPrice());
-        } catch (Exception e) {
-            throw new NumberFormatException("숫자만 입력 가능합니다.");
-        }
         if (!hasText(dto.getTitle())) {
             throw new IllegalArgumentException("카드 이름을 입력해주세요.");
         }
         if (dto.getTitle().length() < 1 || dto.getTitle().length() >= 100) {
             throw new IllegalArgumentException("카드 이름은 1자 이상 100글자 이하여야합니다.");
         }
+
+        try {
+            price = new BigDecimal(dto.getPrice());
+        } catch (Exception e) {
+            throw new NumberFormatException("숫자만 입력 가능합니다.");
+        }
+
         if (price.compareTo(MIN_PRICE) < 0 || price.compareTo(MAX_PRICE) > 0) {
             throw new IllegalArgumentException("가격은 0 이상 100,000 이하여야 합니다.");
         }
