@@ -12,6 +12,10 @@ https://github.com/Heo-y-y/development-blog/assets/112863029/3c12e5be-b0bb-40ad-
 
 https://github.com/Heo-y-y/development-blog/assets/112863029/3f736182-f611-433b-8f6c-c63e13309dc4
 
+### 검색 기능
+
+https://github.com/Heo-y-y/development-blog/assets/112863029/a8dc61a7-0fae-4089-935a-9dacd275610e
+
 ### 유효성 검사
 
 - **회원 유효성**
