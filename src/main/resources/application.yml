@@ -20,11 +20,6 @@ spring:
       schema-locations:
       data-locations: classpath:dml.sql
 
-  servlet:
-    multipart:
-      maxFileSize: 50MB
-      maxRequestSize: 50MB
-
   main:
     allow-bean-definition-overriding: true
 
