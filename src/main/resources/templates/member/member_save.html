@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">회원 등록</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item active">회원 등록</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Info boxes -->
+            <div class="row">
+                <div class="col-6">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">회원 등록</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <form name="memberForm" id="memberForm">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="name">이름</label>
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="이름을 입력해주세요.">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="text" id="email" name="email" class="form-control" placeholder="이메일 입력해주세요.">
+                                </div>
+                                <div class="form-group">
+                                    <label for="date">Date</label>
+                                    <input type="date" id="date" name="date" class="form-control" placeholder="날짜를 선택해주세요.">
+                                </div>
+                                <div class="field-error text-danger" id="errMsg" style="display:none;"></div>
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">등록</button>&nbsp;
+                                <button type="button" class="btn btn-primary" onclick="location.href='/member/list'">취소</button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <script th:inline="javascript">
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const today = new Date();
+                            const minDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+
+                            const createAtInput = document.getElementById('date');
+                            createAtInput.min = formatDate(minDate);
+                            createAtInput.max = formatDate(today);
+                        });
+
+                        document.forms['memberForm'].addEventListener('submit', event => {
+                            event.preventDefault();
+                            const formData = new FormData(event.currentTarget);
+                            const errorField = document.getElementById("errMsg");
+
+                            fetch('/member/save', {
+                                method: 'POST',
+                                body: formData
+                            })
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.status !== 200) {
+                                        errorField.style.display = 'block';
+                                        errorField.innerText = result.message;
+                                        return false;
+                                    }
+
+                                    location.href = result.data;
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                });
+                        });
+
+                        function formatDate(date) {
+                            const year = date.getFullYear();
+                            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                            const day = date.getDate().toString().padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        }
+                    </script>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </div><!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+</html>

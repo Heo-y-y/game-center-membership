@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">카드 추가</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item active">카드 추가</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">카드 정보 입력</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <form name="cardForm" id="cardForm">
+                            <div class="card-body">
+
+                                <div class="form-group">
+                                    <label for="gameId">게임 선택</label>
+                                    <select name="gameId" id="gameId" class="form-control">
+                                        <option th:each="game : ${games}" th:value="${game.id}" th:text="${game.name}">유희왕</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="title">카드 이름</label>
+                                    <input type="text" id="title" name="title" class="form-control"
+                                           placeholder="카드 이름을 입력해주세요." />
+                                </div>
+                                <div class="form-group">
+                                    <label for="price">가격</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                           placeholder="가격을 입력해주세요." />
+                                </div>
+                                <div class="field-error text-danger" id="errMsg" style="display:none;"></div>
+                                <input type="hidden" name="memberId" th:value="${memberId}" />
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">등록</button>&nbsp;
+                                <button type="button" class="btn btn-primary">취소</button>
+                            </div>
+
+                        </form>
+
+                        <script th:inline="javascript">
+                            document.forms['cardForm'].addEventListener('submit', event => {
+                                event.preventDefault();
+                                const formData = new FormData(event.currentTarget);
+                                const errorField = document.getElementById("errMsg");
+
+                                fetch('/card/save', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                    .then(response => response.json())
+                                    .then(result => {
+                                        if (result.status !== 200) {
+                                            errorField.style.display = 'block';
+                                            errorField.innerText = result.message;
+                                            return false;
+                                        }
+
+                                        location.href = result.data;
+                                    })
+                                    .catch(error => {
+                                        console.error(error);
+                                    });
+                            });
+                        </script>
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div><!--/. container-fluid -->
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+</html>

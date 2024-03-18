@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">회원 목록</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item active">회원 목록</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <form th:action>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="input-group input-group-sm" style="width: 200px;">
+                                            <input type="text" th:field="*{condition.name}"
+                                                   class="form-control float-right"
+                                                   placeholder="이름">&nbsp;
+
+                                            <select class="form-control" name="level">
+                                                <option value="">레벨 선택</option>
+                                                <option th:each="level : ${T(com.game.membership.domain.member.enumset.Level).values()}"
+                                                        th:value="${level.name()}"
+                                                        th:text="${level.name()}"
+                                                        th:selected="${condition?.level?.name() eq level.name()} ? 'true' : 'false'">
+                                                </option>
+                                            </select>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="input-group input-group-sm justify-content-end"
+                                             style="width: 150px; float: right;">
+                                            <button type="submit" class="btn btn-primary">검색</button>&nbsp;
+                                            <button type="button" onclick="location.href='/member/save'"
+                                                    class="btn btn-primary">회원 추가
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>이름</th>
+                                    <th>이메일</th>
+                                    <th>가입일자</th>
+                                    <th>레벨</th>
+                                    <th>카드 갯수</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="member : ${members}">
+                                    <td th:text="${member.id}">ID</td>
+                                    <td><a th:href="@{/member/{id}(id=${member.id})}" th:text="${member.name}">[이름]</a>
+                                    </td>
+                                    <td th:text="${member.email}">[이메일]</td>
+                                    <td th:text="${#temporals.format(member.createdAt, 'yyyy.MM.dd')}">[가입일자]
+                                    </td>
+                                    <td th:text="${member.level}">[레벨]</td>
+                                    <td th:text="${member.cardCount}">[카드 갯수]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->
+</div>
+</html>

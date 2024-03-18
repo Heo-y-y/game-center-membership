@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">회원 조회</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item active">회원 조회</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+
+    <div class="content">
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-12 col-sm-6">
+                <div class="card" style="margin-left: 10px;">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h4>회원 정보</h4>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary"
+                                            onclick="location.href='/member/list'">돌아가기
+                                    </button>&nbsp;
+                                    <button class="btn btn-primary" id="deleteBtn">삭제</button>&nbsp;
+                                    <button type="button" class="btn btn-primary"
+                                            th:onclick="|location.href='@{/member/update/{id}(id=${member.id})}'|">수정
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <ul class="list-group list-group-unordered mb-1" style="margin-top: 10px;">
+                            <li class="list-group-item">
+                                <b th:text="${'아이디: '+ member.id}">ID</b>
+                            </li>
+                            <li class="list-group-item">
+                                <b th:text="${'이름: '+ member.name}">이름</b>
+                            </li>
+                            <li class="list-group-item">
+                                <b th:text="${'이메일: '+ member.email}">Email</b>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.card-body -->
+    </div>
+    <div class="container-fluid">
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h4>소유 게임카드</h4>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm justify-content-end"
+                                     style="width: 150px; float: right;">
+                                    <button type="button" class="btn btn-primary"
+                                            th:onclick="|location.href='@{/card/save/{memberId}(memberId=${member.id})}'|">
+                                        카드 등록
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>게임종류</th>
+                                <th>타이틀</th>
+                                <th>일련번호</th>
+                                <th>가격</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${cards.isEmpty()}">
+                                <td colspan="6" class="text-center bg-light py-3">소유하신 카드가 없습니다.</td>
+                            </tr>
+                            <tr th:each="card : ${cards}">
+                                <td th:text="${card.id}">ID</td>
+                                <td th:text="${card.game.name}">게임</td>
+                                <td th:text="${card.title}">타이틀</td>
+                                <td th:text="${card.serialNumber}">일련번호</td>
+                                <td th:text="'$' + ${card.price}">가격</td>
+                                <td>
+                                    <button class="btn btn-primary deleteCardBtn" th:value="${card.id}">삭제</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <script th:inline="javascript">
+                    document.getElementById('deleteBtn').addEventListener('click', () => {
+                        if (!confirm('정말로 삭제할까요?')) {
+                            return false;
+                        } else {
+                            const id = /*[[${member.id}]]*/ '';
+                            fetch(`/member/${id}`, {
+                                method: 'DELETE'
+                            })
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.status !== 200) {
+                                        return false;
+                                    }
+                                    location.href = result.data;
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                });
+                        }
+                    });
+
+                    document.querySelectorAll('.deleteCardBtn').forEach(button => {
+                        button.addEventListener('click', () => {
+                            if (!confirm('정말로 삭제할까요?')) {
+                                return false;
+                            } else {
+                                const cardId = button.getAttribute('value');
+                                fetch(`/card/${cardId}`, {
+                                    method: 'DELETE'
+                                })
+                                    .then(response => response.json())
+                                    .then(result => {
+                                        if (result.status !== 200) {
+                                            return false;
+                                        }
+                                        alert(result.message);
+                                        location.reload();
+                                    })
+                                    .catch(error => {
+                                        console.error(error);
+                                    });
+                            }
+                        });
+                    });
+                </script>
+                <!-- /.card -->
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /.content -->
+</div>
+
+</html>
