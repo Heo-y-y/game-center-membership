@@ -11,13 +11,13 @@ import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.domain.member.service.MemberService;
-import com.game.membership.domain.slack.service.SlackService;
 import com.game.membership.global.error.BusinessException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -39,8 +39,6 @@ class CardServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private GameRepository gameRepository;
-    @Autowired
-    private SlackService slackService;
 
     private Optional<Member> savedMember;
 
@@ -49,6 +47,7 @@ class CardServiceTest {
         MemberFormDto member = new MemberFormDto();
         member.setName("testName");
         member.setEmail("test@gmail.com");
+        member.setDate(LocalDate.now());
         memberService.saveMember(member);
         savedMember = memberRepository.findByEmail(member.getEmail());
     }
@@ -145,7 +144,6 @@ class CardServiceTest {
         @Test
         @DisplayName("유저 찾기 실패")
         void memberNotFound() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(2L);
@@ -161,7 +159,6 @@ class CardServiceTest {
         @Test
         @DisplayName("게임 찾기 실패")
         void gameNotFound() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(5L);
@@ -177,7 +174,6 @@ class CardServiceTest {
         @Test
         @DisplayName("카드 이름 공백")
         void cardNameBlank() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(2L);
@@ -194,7 +190,6 @@ class CardServiceTest {
         @Test
         @DisplayName("카드 이름 공백")
         void cardNameFormat() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(2L);
@@ -213,7 +208,6 @@ class CardServiceTest {
         @Test
         @DisplayName("가격 0부터 확인")
         void checkCardPrice() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(2L);
@@ -230,7 +224,6 @@ class CardServiceTest {
         @Test
         @DisplayName("숫자 확인")
         void checkCardPriceNumber() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(2L);
@@ -251,7 +244,6 @@ class CardServiceTest {
         @Test
         @DisplayName("소유 게임카드 목록")
         void getCardsSuccess() {
-
             // given
             CardFormDto dto = new CardFormDto();
             dto.setGameId(2L);
@@ -271,7 +263,6 @@ class CardServiceTest {
         @Test
         @DisplayName("유저 찾기 실패")
         void memberNotFound() {
-
             // when, then
             BusinessException exception = assertThrows(BusinessException.class, () -> cardService.getCards(1L));
             assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
@@ -284,12 +275,12 @@ class CardServiceTest {
         @Test
         @DisplayName("카드 삭제")
         void deleteCardSuccess() {
-
             // given
             Member member = new Member();
             member.setName("test");
             member.setLevel(Level.BRONZE);
             member.setEmail("test@gmail");
+            member.setCreatedAt(LocalDate.now());
             memberRepository.save(member);
 
             Game game = new Game();
@@ -302,6 +293,7 @@ class CardServiceTest {
             card.setTitle("티모");
             card.setPrice(BigDecimal.valueOf(400));
             card.setSerialNumber(4);
+            card.setCreatedAt(LocalDate.now());
             cardRepository.save(card);
 
             // when

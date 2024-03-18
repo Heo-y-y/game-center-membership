@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +42,6 @@ class MemberControllerTest {
 
     @MockBean
     private CardService cardService;
-
-    @Autowired
-    private WebApplicationContext ctx;
 
     @Nested
     class SaveMember  {
@@ -93,7 +89,7 @@ class MemberControllerTest {
 
 
             // when, then
-            mvc.perform(patch("/member/view/{id}", 1L)
+            mvc.perform(patch("/member/update/{id}", 1L)
                             .contentType(APPLICATION_JSON)
                             .content(json))
                     .andExpect(status().isOk())
@@ -109,7 +105,7 @@ class MemberControllerTest {
             BusinessException expectedException = new BusinessException(MEMBER_NOT_FOUND);
             doThrow(expectedException).when(memberService).updateMember(any(MemberFormDto.class), any(Long.class));
             // when, then
-            mvc.perform(patch("/member/view/{id}", 1L)
+            mvc.perform(patch("/member/update/{id}", 1L)
                             .contentType(APPLICATION_JSON)
                             .content(json))
                     .andExpect(status().isOk())
@@ -136,7 +132,7 @@ class MemberControllerTest {
             when(memberService.getMember(anyLong())).thenReturn(memberDto);
             when(cardService.getCards(anyLong())).thenReturn(cards);
 
-            // Perform the GET request and verify the response
+            // then
             mvc.perform(get("/member/{id}", 1L))
                     .andExpect(status().isOk())
                     .andExpect(view().name("member/member_detail"))

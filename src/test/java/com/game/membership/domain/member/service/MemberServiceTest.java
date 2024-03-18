@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +57,7 @@ class MemberServiceTest {
             MemberFormDto dto = new MemberFormDto();
             dto.setName("testName");
             dto.setEmail("test@gmail.com");
+            dto.setDate(LocalDate.now());
 
             // when
             memberService.saveMember(dto);
@@ -75,10 +77,12 @@ class MemberServiceTest {
             MemberFormDto dto1 = new MemberFormDto();
             dto1.setName("testName1");
             dto1.setEmail("test@gmail.com");
+            dto1.setDate(LocalDate.now());
 
             MemberFormDto dto2 = new MemberFormDto();
             dto2.setName("testName2");
             dto2.setEmail("test@gmail.com");
+            dto2.setDate(LocalDate.now());
 
             // when,then
             memberService.saveMember(dto1);
@@ -97,11 +101,13 @@ class MemberServiceTest {
             Member member = new Member();
             member.setName("testName");
             member.setEmail("test@gmail.com");
+            member.setCreatedAt(LocalDate.now());
             Member saveMember = memberRepository.save(member);
 
             MemberFormDto dto = new MemberFormDto();
             dto.setName("changeName");
             dto.setEmail("change@gmail.com");
+            dto.setDate(LocalDate.now());
 
             // when
             memberService.updateMember(dto, saveMember.getId());
@@ -120,6 +126,7 @@ class MemberServiceTest {
             MemberFormDto dto = new MemberFormDto();
             dto.setName("testName");
             dto.setEmail("test@gmail.com");
+            dto.setDate(LocalDate.now());
 
             // when, then
             BusinessException exception = assertThrows(BusinessException.class, () -> memberService.updateMember(dto, 1L));
@@ -133,16 +140,19 @@ class MemberServiceTest {
             Member testMember = new Member();
             testMember.setName("testName");
             testMember.setEmail("test@gmail.com");
+            testMember.setCreatedAt(LocalDate.now());
             Member saveMember = memberRepository.save(testMember);
 
             Member anotherMember = new Member();
             anotherMember.setName("anotherName");
             anotherMember.setEmail("test@naver.com");
+            anotherMember.setCreatedAt(LocalDate.now());
             memberRepository.save(anotherMember);
 
             MemberFormDto dto = new MemberFormDto();
             dto.setName("changeName");
             dto.setEmail("test@naver.com");
+            dto.setDate(LocalDate.now());
 
             // when, then
             BusinessException exception = assertThrows(BusinessException.class, () -> memberService.updateMember(dto, saveMember.getId()));
@@ -161,10 +171,12 @@ class MemberServiceTest {
             MemberFormDto dto = new MemberFormDto();
             dto.setName("박효신");
             dto.setEmail("hyo@gmail.com");
+            dto.setDate(LocalDate.now());
 
             MemberFormDto dto1 = new MemberFormDto();
             dto1.setName("박지성");
             dto1.setEmail("mu@gmail.com");
+            dto1.setDate(LocalDate.now());
 
             memberService.saveMember(dto);
             memberService.saveMember(dto1);
@@ -187,10 +199,12 @@ class MemberServiceTest {
             MemberFormDto dto = new MemberFormDto();
             dto.setName("박효신");
             dto.setEmail("hyo@gmail.com");
+            dto.setDate(LocalDate.now());
 
             MemberFormDto dto1 = new MemberFormDto();
             dto1.setName("박지성");
             dto1.setEmail("mu@gmail.com");
+            dto1.setDate(LocalDate.now());
 
             memberService.saveMember(dto);
             memberService.saveMember(dto1);
@@ -216,6 +230,7 @@ class MemberServiceTest {
             MemberFormDto dto = new MemberFormDto();
             dto.setName("testName");
             dto.setEmail("test@gmail.com");
+            dto.setDate(LocalDate.now());
             memberService.saveMember(dto);
 
             Optional<Member> savedMember = memberRepository.findByEmail(dto.getEmail());
@@ -242,7 +257,6 @@ class MemberServiceTest {
         @Test
         @DisplayName("존재하는 유저 없음")
         void memberDeleteMemberNotFound() throws Exception {
-
             // when, then
             BusinessException exception = assertThrows(BusinessException.class, () -> memberService.deleteMember(1L));
             assertEquals(exception.getMessage(), "가입된 사용자가 아닙니다.");
@@ -258,6 +272,7 @@ class MemberServiceTest {
             MemberFormDto dto1 = new MemberFormDto();
             dto1.setName("testName");
             dto1.setEmail("test@gmail.com");
+            dto1.setDate(LocalDate.now());
             memberService.saveMember(dto1);
             Optional<Member> saveMember = memberRepository.findByEmail(dto1.getEmail());
 
@@ -285,7 +300,6 @@ class MemberServiceTest {
         @Test
         @DisplayName("이름 공백")
         void nameBlank() {
-
             // given
             MemberFormDto dto = new MemberFormDto();
             dto.setEmail("test@gmail.com");

@@ -47,7 +47,6 @@ class SlackServiceTest {
     @Test
     @DisplayName("유저 확인")
     void nullMember() {
-
         // given
         when(messageTemplate.getMessage())
                 .thenReturn("ID{member.id}의 {member.name}님이 {member.level}등급으로 가입되었습니다.");
