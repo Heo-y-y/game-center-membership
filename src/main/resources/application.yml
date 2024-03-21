@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/games_membership?serverTimezone=UTC&characterEncoding=UTF-8
     username: root
-    password: password
+    password:
 
   jpa:
     hibernate:
@@ -37,7 +37,4 @@ logging:
 
 webhook:
   slack:
-    url: https://hooks.slack.com/services/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
-
-#    지원자 웹훅
-#    url: https://hooks.slack.com/services/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
+    url:
