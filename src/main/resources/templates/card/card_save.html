@@ -36,6 +36,7 @@
                                 <div class="form-group">
                                     <label for="gameId">게임 선택</label>
                                     <select name="gameId" id="gameId" class="form-control">
+                                        <option value="">게임을 선택해주세요.</option>
                                         <option th:each="game : ${games}" th:value="${game.id}" th:text="${game.name}">유희왕</option>
                                     </select>
                                 </div>
