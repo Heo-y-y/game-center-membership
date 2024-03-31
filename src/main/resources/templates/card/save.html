@@ -3,6 +3,12 @@
       layout:decorate="~{layouts/layout}">
 
 <div layout:fragment="content">
+    <style>
+        .field-error {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+    </style>
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -11,7 +17,7 @@
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/members">Home</a></li>
                         <li class="breadcrumb-item active">카드 추가</li>
                     </ol>
                 </div><!-- /.col -->
@@ -30,29 +36,38 @@
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
-                        <form name="cardForm" id="cardForm">
+                        <form action="member.html" th:action th:object="${card}" method="post">
+
+<!--                            <div th:if="${#fields.hasGlobalErrors()}">-->
+<!--                                <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">글로벌 오류-->
+<!--                                    메시지</p>-->
+<!--                            </div>-->
+
                             <div class="card-body">
 
                                 <div class="form-group">
                                     <label for="gameId">게임 선택</label>
-                                    <select name="gameId" id="gameId" class="form-control">
+                                    <select id="gameId" class="form-control" th:field="*{gameId}" th:errorclass="field-error">
                                         <option value="">게임을 선택해주세요.</option>
-                                        <option th:each="game : ${games}" th:value="${game.id}" th:text="${game.name}">유희왕</option>
+                                        <option th:each="game : ${games}" th:value="${game.id}"
+                                                th:text="${game.name}">유희왕</option>
                                     </select>
+                                    <div class="field-error" th:errors="*{gameId}"></div>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="title">카드 이름</label>
-                                    <input type="text" id="title" name="title" class="form-control"
-                                           placeholder="카드 이름을 입력해주세요." />
+                                    <input type="text" id="title" th:field="*{title}" class="form-control"
+                                           placeholder="카드 이름을 입력해주세요." th:errorclass="field-error" />
+                                    <div class="field-error" th:errors="*{title}"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="price">가격</label>
-                                    <input type="text" id="price" name="price" class="form-control"
-                                           placeholder="가격을 입력해주세요." />
+                                    <input type="text" id="price" th:field="*{price}" class="form-control"
+                                           placeholder="가격을 입력해주세요." th:errorclass="field-error" />
+                                    <div class="field-error" th:errors="*{price}"></div>
                                 </div>
-                                <div class="field-error text-danger" id="errMsg" style="display:none;"></div>
-                                <input type="hidden" name="memberId" th:value="${memberId}" />
+<!--                                <input type="hidden" name="memberId" th:value="${memberId}" />-->
                             </div>
                             <!-- /.card-body -->
 
@@ -63,31 +78,6 @@
 
                         </form>
 
-                        <script th:inline="javascript">
-                            document.forms['cardForm'].addEventListener('submit', event => {
-                                event.preventDefault();
-                                const formData = new FormData(event.currentTarget);
-                                const errorField = document.getElementById("errMsg");
-
-                                fetch('/card/save', {
-                                    method: 'POST',
-                                    body: formData
-                                })
-                                    .then(response => response.json())
-                                    .then(result => {
-                                        if (result.status !== 200) {
-                                            errorField.style.display = 'block';
-                                            errorField.innerText = result.message;
-                                            return false;
-                                        }
-
-                                        location.href = result.data;
-                                    })
-                                    .catch(error => {
-                                        console.error(error);
-                                    });
-                            });
-                        </script>
                         <!-- /.card -->
                     </div>
                 </div>

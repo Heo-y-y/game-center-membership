@@ -21,12 +21,14 @@ public class SlackService {
 
     /**
      * 슬랙 메시지 전송
-     **/
+     *
+     * @param message
+     */
     public ResponseEntity<String> sendMessage(String message) {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, Object> request = new HashMap<>();
-        request.put("username", "지원자 허윤영");
+        request.put("username", "관리자");
         request.put("text", message);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request);
@@ -36,7 +38,11 @@ public class SlackService {
 
     /**
      * 메시지 치환
-     **/
+     *
+     * @param member
+     * @param messageTemplate
+     * @return message
+     */
     public String createSlackMessage(Member member, MessageTemplate messageTemplate) {
         String message = messageTemplate.getMessage();
 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<div layout:fragment="content">
+    <style>
+        .field-error {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+    </style>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">회원 수정</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/members">Home</a></li>
+                        <li class="breadcrumb-item active">회원 수정</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Info boxes -->
+            <div class="row">
+                <div class="col-6">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">회원 수정</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <form action="member.html" th:action th:object="${member}" method="post">
+
+                            <div th:if="${#fields.hasGlobalErrors()}">
+                                <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">글로벌 오류
+                                    메시지</p>
+                            </div>
+
+                            <div class="card-body">
+                                <h4 th:text="${'ID:'+member.id}"></h4>
+                                <div class="form-group">
+                                    <label for="name">이름</label>
+                                    <input type="text" id="name" th:field="*{name}" class="form-control"
+                                           placeholder="이름을 입력해주세요."  th:errorclass="field-error">
+                                    <div class="field-error" th:errors="*{name}"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="text" id="email" th:field="*{email}" class="form-control"
+                                           placeholder="이메일을 입력해주세요." th:errorclass="field-error">
+                                    <div class="field-error" th:errors="*{email}"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="updatedAt">Date</label>
+                                    <input type="date" id="updatedAt" th:field="*{updatedAt}" class="form-control"
+                                           placeholder="날짜를 선택해주세요." th:errorclass="field-error">
+                                    <div class="field-error" th:errors="*{updatedAt}"></div>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">수정</button>&nbsp;
+                                <button type="button" class="btn btn-primary"
+                                        th:onclick="|location.href='@{/members/{id}(id=${member.id})}'|">
+                                    취소
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </div><!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+</html>

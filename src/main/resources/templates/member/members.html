@@ -11,7 +11,7 @@
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/members">Home</a></li>
                         <li class="breadcrumb-item active">회원 목록</li>
                     </ol>
                 </div><!-- /.col -->
@@ -28,11 +28,11 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <form th:action>
+                            <form th:action th:object="${condition}">
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="input-group input-group-sm" style="width: 200px;">
-                                            <input type="text" th:field="*{condition.name}"
+                                            <input type="text" th:field="*{name}"
                                                    class="form-control float-right"
                                                    placeholder="이름">&nbsp;
 
@@ -52,7 +52,7 @@
                                         <div class="input-group input-group-sm justify-content-end"
                                              style="width: 150px; float: right;">
                                             <button type="submit" class="btn btn-primary">검색</button>&nbsp;
-                                            <button type="button" onclick="location.href='/member/save'"
+                                            <button type="button" onclick="location.href='/members/save'"
                                                     class="btn btn-primary">회원 추가
                                             </button>
                                         </div>
@@ -76,7 +76,7 @@
                                 <tbody>
                                 <tr th:each="member : ${members}">
                                     <td th:text="${member.id}">ID</td>
-                                    <td><a th:href="@{/member/{id}(id=${member.id})}" th:text="${member.name}">[이름]</a>
+                                    <td><a th:href="@{/members/{id}(id=${member.id})}" th:text="${member.name}">[이름]</a>
                                     </td>
                                     <td th:text="${member.email}">[이메일]</td>
                                     <td th:text="${#temporals.format(member.createdAt, 'yyyy.MM.dd')}">[가입일자]

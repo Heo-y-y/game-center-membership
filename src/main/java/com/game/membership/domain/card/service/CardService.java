@@ -1,6 +1,5 @@
 package com.game.membership.domain.card.service;
 
-import com.game.membership.domain.card.dto.CardFormDto;
 import com.game.membership.domain.card.dto.CardListDto;
 import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
@@ -12,10 +11,12 @@ import com.game.membership.domain.member.repository.MemberRepository;
 import com.game.membership.domain.slack.enumset.MessageTemplate;
 import com.game.membership.domain.slack.service.SlackService;
 import com.game.membership.global.error.BusinessException;
+import com.game.membership.web.card.form.CardSaveForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.game.membership.global.error.ErrorCode.*;
-import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @Service
@@ -39,23 +39,23 @@ public class CardService {
     private static final BigDecimal MAX_PRICE = new BigDecimal("100000");
     private static final BigDecimal MIN_PRICE = BigDecimal.ZERO;
 
-
     /**
      * 카드 등록
-     **/
+     *
+     * @param form
+     */
     @Transactional
-    public void saveCard(CardFormDto dto) {
-        cardFormValidation(dto);
+    public void saveCard(CardSaveForm form) {
 
-        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
-        Game game = gameRepository.findById(dto.getGameId()).orElseThrow(() -> new BusinessException(GAME_NOT_FOUND));
+        Member member = memberRepository.findById(form.getMemberId()).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+        Game game = gameRepository.findById(form.getGameId()).orElseThrow(() -> new BusinessException(GAME_NOT_FOUND));
 
         Card card = Card.builder()
-                .title(dto.getTitle())
+                .title(form.getTitle())
                 .game(game)
                 .member(member)
                 .serialNumber(this.genRandomNumber(game))
-                .price(new BigDecimal(dto.getPrice()))
+                .price(new BigDecimal(form.getPrice()))
                 .createdAt(LocalDate.now())
                 .build();
 
@@ -65,8 +65,10 @@ public class CardService {
     }
 
     /**
-     * 소유 카드 목록
-     **/
+     * 카드 목록
+     *
+     * @param memberId
+     */
     public List<CardListDto> getCards(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
         List<Card> cards = cardRepository.findByMemberOrderByIdDesc(member);
@@ -76,7 +78,9 @@ public class CardService {
 
     /**
      * 카드 삭제
-     **/
+     *
+     * @param id
+     */
     @Transactional
     public void deleteCard(Long id) {
         Card card = cardRepository.findById(id)
@@ -88,32 +92,41 @@ public class CardService {
     }
 
     /**
-     * 카드 폼 유효성 검사
-     **/
-    private static void cardFormValidation(CardFormDto dto) {
+     * 카드 등록 폼 복합 유효성
+     *
+     * @param form
+     * @param bindingResult
+     */
+    public void cardSaveFormValid(CardSaveForm form, BindingResult bindingResult) {
+
+        if (form.getGameId() == null || !gameRepository.findById(form.getGameId()).isPresent()) {
+            bindingResult.rejectValue("gameId", "error.card", "게임을 선택해주세요.");
+        }
+
         BigDecimal price;
 
-        if (!hasText(dto.getTitle())) {
-            throw new IllegalArgumentException("카드 이름을 입력해주세요.");
-        }
-        if (dto.getTitle().length() < 1 || dto.getTitle().length() >= 100) {
-            throw new IllegalArgumentException("카드 이름은 1자 이상 100글자 이하여야합니다.");
-        }
-
         try {
-            price = new BigDecimal(dto.getPrice());
-        } catch (Exception e) {
-            throw new NumberFormatException("숫자만 입력 가능합니다.");
-        }
+            if (form.getPrice() == null) {
+                bindingResult.rejectValue("price", "error.card", "가격을 입력해주세요.");
+            }
 
-        if (price.compareTo(MIN_PRICE) < 0 || price.compareTo(MAX_PRICE) > 0) {
-            throw new IllegalArgumentException("가격은 0 이상 100,000 이하여야 합니다.");
+            price = new BigDecimal(form.getPrice());
+
+            if (price.compareTo(MIN_PRICE) < 0 || price.compareTo(MAX_PRICE) > 0) {
+                bindingResult.rejectValue("price", "error.card", "가격은 0 이상 100,000 이하여야 합니다.");
+            }
+
+        } catch (Exception e) {
+            bindingResult.rejectValue("price", "error.card", "숫자만 입력 가능합니다.");
         }
     }
 
     /**
-     * 회원 레벨 부여 규칙 및 레벨 변경 통보
-     **/
+     * 레벨 변경
+     *
+     * @param member
+     * @param messageTemplate
+     */
     private void setLevel(Member member, MessageTemplate messageTemplate) {
         List<CardListDto> cards = this.getCards(member.getId());
         Long gameCount = cardRepository.countDistinctGamesByMember(member);
@@ -148,7 +161,10 @@ public class CardService {
 
     /**
      * 카드 일련 번호 생성
-     **/
+     *
+     * @param game
+     * @return serialNumber
+     */
     private int genRandomNumber(Game game) {
         int serialNumber = 0;
 

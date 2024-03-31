@@ -11,6 +11,7 @@ import java.time.LocalDate;
 public class MemberListDto {
 
     private Long id;
+
     private String name;
 
     private String email;

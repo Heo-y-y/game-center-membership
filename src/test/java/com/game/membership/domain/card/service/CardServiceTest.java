@@ -6,7 +6,6 @@ import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.game.entity.Game;
 import com.game.membership.domain.game.repository.GameRepository;
-import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.entity.Member;
 import com.game.membership.domain.member.enumset.Level;
 import com.game.membership.domain.member.repository.MemberRepository;

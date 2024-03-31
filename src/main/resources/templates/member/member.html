@@ -11,7 +11,7 @@
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="/member/list">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/members">Home</a></li>
                         <li class="breadcrumb-item active">회원 조회</li>
                     </ol>
                 </div><!-- /.col -->
@@ -35,11 +35,11 @@
                             <div class="col-sm-6">
                                 <div class="d-flex justify-content-end">
                                     <button type="button" class="btn btn-primary"
-                                            onclick="location.href='/member/list'">돌아가기
+                                            onclick="location.href='/members'">돌아가기
                                     </button>&nbsp;
                                     <button class="btn btn-primary" id="deleteBtn">삭제</button>&nbsp;
                                     <button type="button" class="btn btn-primary"
-                                            th:onclick="|location.href='@{/member/update/{id}(id=${member.id})}'|">수정
+                                            th:onclick="|location.href='@{/members/{id}/update(id=${member.id})}'|">수정
                                     </button>
                                 </div>
                             </div>
@@ -76,7 +76,7 @@
                                 <div class="input-group input-group-sm justify-content-end"
                                      style="width: 150px; float: right;">
                                     <button type="button" class="btn btn-primary"
-                                            th:onclick="|location.href='@{/card/save/{memberId}(memberId=${member.id})}'|">
+                                            th:onclick="|location.href='@{/cards/{memberId}/save(memberId=${member.id})}'|">
                                         카드 등록
                                     </button>
 
@@ -122,7 +122,7 @@
                             return false;
                         } else {
                             const id = /*[[${member.id}]]*/ '';
-                            fetch(`/member/${id}`, {
+                            fetch(`/members/${id}`, {
                                 method: 'DELETE'
                             })
                                 .then(response => response.json())
@@ -144,7 +144,7 @@
                                 return false;
                             } else {
                                 const cardId = button.getAttribute('value');
-                                fetch(`/card/${cardId}`, {
+                                fetch(`/cards/${cardId}`, {
                                     method: 'DELETE'
                                 })
                                     .then(response => response.json())

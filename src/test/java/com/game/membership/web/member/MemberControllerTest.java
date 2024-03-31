@@ -3,7 +3,6 @@ package com.game.membership.web.member;
 import com.game.membership.domain.card.dto.CardListDto;
 import com.game.membership.domain.card.service.CardService;
 import com.game.membership.domain.member.dto.MemberDto;
-import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.service.MemberService;
 import com.game.membership.global.error.BusinessException;
 import org.junit.jupiter.api.DisplayName;

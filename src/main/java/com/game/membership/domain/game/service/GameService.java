@@ -20,7 +20,7 @@ public class GameService {
 
     /**
      * 게임 목록
-     **/
+     */
     public List<GameListDto> getGameList() {
         List<Game> games = gameRepository.findAll(Sort.by("id"));
 

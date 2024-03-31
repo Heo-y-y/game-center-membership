@@ -5,7 +5,6 @@ import com.game.membership.domain.card.entity.Card;
 import com.game.membership.domain.card.repository.CardRepository;
 import com.game.membership.domain.card.service.CardService;
 import com.game.membership.domain.member.dto.MemberDto;
-import com.game.membership.domain.member.dto.MemberFormDto;
 import com.game.membership.domain.member.dto.MemberListConditionDto;
 import com.game.membership.domain.member.dto.MemberListDto;
 import com.game.membership.domain.member.entity.Member;

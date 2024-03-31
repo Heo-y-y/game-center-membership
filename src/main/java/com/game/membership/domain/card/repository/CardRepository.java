@@ -11,7 +11,9 @@ import java.util.List;
 public interface CardRepository extends JpaRepository<Card, Long> {
 
     /**
-     * 게임 중복 확인
+     * 카드 중복 확인
+     *
+     * @param member
      */
     @Query("SELECT count(DISTINCT c.game) FROM Card c WHERE c.member = :member")
     Long countDistinctGamesByMember(Member member);

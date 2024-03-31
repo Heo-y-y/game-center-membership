@@ -33,6 +33,7 @@ public class Member{
     private Level level;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+//    @Column(name = "created_at", updatable = false)
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
 
